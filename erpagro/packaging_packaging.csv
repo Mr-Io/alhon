@@ -1,0 +1,10 @@
+id,name,price,destare_in,destare_out,min_stock,type
+1,EUROPEA GRANDE,2.6,2.5,2.5,,plastico
+2,EUROPEA MEDIANA,2.2,2.1,2.1,,plastico
+3,EUROPEA PEQUEÑA,1.7,1.5,1.5,,plastico
+4,CONTENEDOR DE SANDIA,60,35,35,,plastico
+5,CAJA PEQUEÑA,2,2,2,,plastico
+6,EUROMINI (PETI),0.75,0.5,0.5,,plastico
+7,PALET GRANDE,20,25,0,,madera
+8,PALET CAMPO,20,20,0,,madera
+9,PALET BLANCO (FINO),3.6,10,0,,madera
