@@ -1,0 +1,127 @@
+{% extends "base/layout.html" %}
+
+{% load static %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark border-bottom border-bottom-dark" data-bs-theme="dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'base:index' %}">
+        <img src="{% static 'images/logo.png' %}" height="40px" alt="Roquevicar SA">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if perms.purchases %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Compras</a>
+          <ul class="dropdown-menu">
+            {% if perms.purchases.add_entrynote %}
+            <li><a class="dropdown-item" href="{% url 'purchases:entry' %}">Entrada</a></li>
+            {% endif %}
+            {% if perms.purchases.view_entrynote %}
+            <li><a class="dropdown-item" href="#">Listado</a></li>
+            {% endif %}
+            {% if perms.purchases.add_invoice %}
+            <li><a class="dropdown-item" href="#">Facturar</a></li>
+            {% endif %}
+            {% if perms.purchases.change_invoice %}
+            <li><a class="dropdown-item" href="#">Liquidación</a></li>
+            <li><a class="dropdown-item" href="#">Pago</a></li>
+            {% endif %}
+            {% if request.user.is_staff %}
+            <li><hr class="dropdown-divider"></li>
+            {% if perms.purchases.change_entrynote %}
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_entrynote_changelist' %}">Albaranes histórico</a></li>
+            {% endif %}
+            {% if perms.purchases.change_supplier %}
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_supplier_changelist' %}">Agricultores</a></li>
+            {% endif %}
+            {% if perms.purchases.change_suppliergroup %}
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_suppliergroup_changelist' %}">Agrupaciones</a></li>
+            {% endif %}
+            {% if perms.purchases.change_charge %}
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_charge_changelist' %}">Tarifas</a></li>
+            {% endif %}
+            {% if perms.purchases.change_carrieragent %}
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_carrieragent_changelist' %}">Transportistas</a></li>
+            {% endif %}
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+        {% if perms.sales %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Ventas</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Venta</a></li>
+            <li><a class="dropdown-item" href="#">Salida</a></li>
+            <li><a class="dropdown-item" href="#">Listado</a></li>
+            {% if request.user.is_staff %}
+            <li><a class="dropdown-item" href="#">Factura</a></li>
+            <li><a class="dropdown-item" href="#">Cobro</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:sales_client_changelist' %}">Clientes</a></li>
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:sales_commissionagent_changelist' %}">Comisionistas</a></li>
+            {% endif %}
+          </ul>
+        </li>
+        {% if perms.packaging %}
+        {% endif %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Envases</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Entrada</a></li>
+            <li><a class="dropdown-item" href="#">Salida</a></li>
+            {% if request.user.is_staff %}
+            <li><a class="dropdown-item" href="#">Stock</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:packaging_packaging_changelist' %}">Envases</a></li>
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:packaging_transaction_changelist' %}">Movimientos</a></li>
+            {% endif %}
+          </ul>
+        </li>
+        {% endif %}
+        {% if perms.quality %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Calidad</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Agricultores</a></li>
+            <li><a class="dropdown-item" href="#">Naves</a></li>
+            <li><a class="dropdown-item" href="#">Fincas</a></li>
+            <li><a class="dropdown-item" href="#">Análisis</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        {% if perms.accounting %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Contabilidad</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Asientos</a></li>
+          </ul>
+        </li>
+        {% endif %}
+        {% if request.user.is_staff %}
+        <li class="nav-item">
+          <a class="nav-link" target="_blank" href="{% url 'admin:index' %}">Admin</a>
+        </li>
+        {% endif %}
+      </ul>
+      {% if request.user.is_authenticated %}
+      <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ request.user | upper }}
+        </button>
+        <ul class="dropdown-menu">
+          <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+        </ul>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</nav>
+{% block section %}
+{% endblock %}
+{% endblock %}

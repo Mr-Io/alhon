@@ -14,7 +14,7 @@ class CarrierAgent(Agent, ExpenseCarrierPriceAbstract):
     class Meta:
         verbose_name = "transportista"
 
-class ExpensesAbstract(ExpenseCarrierPriceAbstract):
+class ExpensesAbstract(models.Model):
     carrier = models.ForeignKey(CarrierAgent, on_delete=models.PROTECT, verbose_name="transportista", blank=True, null=True)
     class Meta:
         abstract = True
@@ -50,6 +50,11 @@ class Supplier(Agent, ExpensesAbstract):
     share = models.SmallIntegerField("porcentaje de reparto", blank=True, null=True)
     charge = models.ForeignKey(Charge, on_delete=models.PROTECT, verbose_name="tarifa")
 
+    def is_this_user(self, user):
+        if not hasattr(self, "user"):
+            return False
+        return self.user == user
+
     class Meta:
         verbose_name = "agricultor"
         verbose_name_plural = "agricultores"
@@ -66,7 +71,7 @@ class Invoice(models.Model):
         return f"{self.pk}"
 
 
-class EntryNote(ExpensesAbstract):
+class EntryNote(ExpensesAbstract, ExpenseCarrierPriceAbstract):
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name="entrynotes", verbose_name="agricultor")
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name="fecha")
     invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="entrynotes", blank = True, null=True, verbose_name="factura")
@@ -84,14 +89,14 @@ class EntryNote(ExpensesAbstract):
         return f"{self.pk}"
 
 class Entry(EntryExitAbstract):
-    entry_note = models.ForeignKey(EntryNote, on_delete=models.CASCADE, related_name="entries", verbose_name="albarán")
-    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, related_name="entries", blank=True, null=True, verbose_name="nave")
-    agrofood = models.ForeignKey(AgrofoodType, on_delete=models.PROTECT, related_name="entries", verbose_name="género")
+    entrynote = models.ForeignKey(EntryNote, on_delete=models.CASCADE, verbose_name="albarán")
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, blank=True, null=True, verbose_name="nave")
+    agrofood = models.ForeignKey(AgrofoodType, on_delete=models.PROTECT, verbose_name="género")
 
     #price - precio total
     @admin.display(description="precio total")
     def total_price(self):
-        return self.price * self.weight 
+        return self.price * self.weight if self.price else "-"
 
     class Meta:
         verbose_name = "entrada"

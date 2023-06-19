@@ -1,0 +1,136 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block head %}
+<script src="{% static 'frontend/entry.js' %}"></script>
+{% endblock head %}
+
+{% block section %}
+
+<div class="container-sm mt-3">
+    {% if message %}
+    <div id="message" class="row mb-2">
+        <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ message }}</p>
+    </div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="row mb-2">
+            <label for="supplier-pk" class="form-label col-sm-3 col-form-label">Agricultor</label>
+            <div class="col-sm-9">
+                <select name="supplier-pk" autocomplete="off" class="form-control" id="supplier-pk">
+                    <option hidden selected></option>
+                    {% for supplier in suppliers %}
+                    <option value="{{ supplier.pk }}">{{ supplier.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div id="formdiv" style="display: none;">
+            <div class="row mb-2">
+                <label for="carrier-pk" class="form-label col-sm-3 col-form-label">Transportista</label>
+                <div class="col-sm-9">
+                    <select name="carrier-pk" class="form-control" id="carrier-pk">
+                        <option hidden selected></option>
+                        {% for carrier in carriers %}
+                        <option value="{{ carrier.pk }}">{{carrier.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <label for="carrier_price" class="form-label col-sm-3 col-form-label">Precio Porte</label>
+                <div class="col-sm-9">
+                    <input name="carrier-price" type="number" id="carrier-price" step="0.0001" class="form-control">
+                </div>
+            </div>
+            <fieldset id="entry-base" class="p-2 mb-2">
+                <div class="row row-cols-auto mb-2 ">
+                    <div class="col">
+                        <button type="button" id="close-entry" class="btn btn-close btn-sm" href="#"></button></button>
+                    </div>
+                    <div class="col">
+                        <h4 id="entry-title">Entrada</h4>
+                    </div>
+                </div>
+                <div class="row mb-2 justify-content-end">
+                    <div class="col-md-4">
+                        <label for="warehouse" class="form-label">Nave</label>
+                        <select id="warehouse-pk" class="form-select">
+                            <option id="warehouse-hidden-option" hidden selected></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="agrofoodtype" class="form-label">Género</label>
+                        <select id="agrofoodtype-pk" class="form-select">
+                            <option id="agrofoodtype-option" hidden selected></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="grossweight" class="form-label">Peso(kg)</label>
+                        <input id="grossweight" type="number" class="form-control" step="0.1" min="0" disabled>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Envase</label>
+                        <select id="packaging-pk" class="form-control">
+                            <option hidden selected></option>
+                            {% for box in boxes %}
+                            <option value="{{ box.pk }}">{{box.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="num-packages" class="form-label">NºBultos</label>
+                        <input id="num-packages" type="number" class="form-control" min="0" disabled>
+                    </div>
+                </div>
+                <div class="p-2 mb-2">
+                    <div id="pallet-labels" style="display:none" class="row mb-2 justify-content-end">
+                        <div class="col col-md-1 text-end">
+                        </div>
+                        <div class="col col-md-2">
+                            <label id="packaging" class="form-label">Tipo Pallet</label>
+                        </div>
+                        <div class="col col-md-2">
+                            <label for="num_packaging" class="form-label">NºPallets</label>
+                        </div>
+                    </div>
+                    <div id="pallet-input-row" style="display:none" class="row mb-2 justify-content-end">
+                        <div class="col col-md-1 text-end">
+                            <button type="button" id="close-pallet" class="btn btn-close "></button>
+                        </div>
+                        <div class="col col-md-2">
+                            <select class="form-control" id="pallet-pk">
+                                <option hidden selected></option>
+                                {% for pallet in pallets %}
+                                <option value="{{ pallet.pk }}">{{ pallet.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col col-md-2">
+                            <input id="numpallets" class="form-control" type="number" min="0">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2 justify-content-end">
+                    <div class="col-md-4 text-end">
+                        <button id="add-pallet-btn" type="button" class="btn btn-link btn-sm">Añadir Pallets</button>
+                    </div>
+                </div>
+            </fieldset>
+            <br>
+            <div class="row mb-2">
+                <div class="col">
+                    <button id="add-entry" type="button" class="btn btn-sm btn-secondary">Añadir Entrada</button>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col">
+                    <input id="submitbtn" style="display:none" class="btn btn-primary" type="submit" value="guardar">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock section %}

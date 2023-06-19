@@ -1,4 +1,0 @@
-id,password,last_login,is_superuser,username,last_name,email,is_staff,is_active,date_joined,first_name
-1,pbkdf2_sha256$600000$ck7kyeBkb5cih7KtrPuhm1$766KUnHf0VNCxUxJiAQkCv5PCURqpq8kfZJGbIkbYzw=,2023-06-15 16:18:10.058771,1,mrio,,mrio.dev@gmail.com,1,1,2023-06-12 08:28:17.258012,
-2,pbkdf2_sha256$600000$d7Jw3ZpwxzyIo5W8XSEX2P$33xnMeQcztm4d4i5son4ULeK9mHZbn2M5WMmoa067LM=,2023-06-16 07:31:48.303794,1,alvaro,,alvaro.rigaud93@gmail.com,1,1,2023-06-12 08:29:22.605938,
-3,pbkdf2_sha256$600000$mVznIpNBrN14M6vwHTkQhp$Njck1GhvGoP4TZzsqjVhlCOazeEJHGQGxjhBOqwllvc=,2023-06-12 12:34:30.915786,1,elena,,,1,1,2023-06-12 12:32:57,

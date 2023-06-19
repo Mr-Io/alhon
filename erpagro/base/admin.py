@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Agent, Contact
+from .models import Contact
 
 class ContactInline(admin.TabularInline):
     model = Contact

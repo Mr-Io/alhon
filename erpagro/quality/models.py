@@ -1,24 +1,24 @@
 from django.db import models
 
 # Create your models here.
+from base.models import Agent
 from product.models import AgrofoodType
 
 
 class QualityType(models.Model):
-    value = models.PositiveSmallIntegerField(unique=True)
+    name = models.CharField("nombre", max_length=256)
 
     class Meta:
         verbose_name = "tipo de calidad"
         verbose_name_plural = "tipos de calidad"
 
     def __str__(self):
-        return f"nivel de calidad: {self.value}"
-
+        return self.name
 
 
 class Land (models.Model):
     name = models.CharField("nombre", max_length=256)
-    supplier = models.ForeignKey("purchases.Supplier", on_delete=models.CASCADE, related_name="lands", verbose_name="Agricultor")
+    supplier = models.ForeignKey("purchases.Supplier", on_delete=models.CASCADE, verbose_name="Agricultor")
 
     class Meta:
         verbose_name = "finca"
@@ -31,16 +31,29 @@ class Land (models.Model):
 
 class Warehouse(models.Model):
     name = models.CharField("nombre", max_length=256)
-    land = models.ForeignKey(Land, on_delete=models.CASCADE, related_name="warehouses", verbose_name="finca")
-    quality = models.ForeignKey(QualityType, on_delete=models.PROTECT, related_name="warehouses", verbose_name="calidad")
-    agrofood_types = models.ManyToManyField(AgrofoodType, related_name="warehouses", verbose_name="tipo de género")
+    land = models.ForeignKey(Land, on_delete=models.CASCADE, verbose_name="finca")
+    quality = models.ForeignKey(QualityType, on_delete=models.PROTECT, verbose_name="calidad")
+    agrofoodtypes = models.ManyToManyField(AgrofoodType, related_name="warehouses", verbose_name="tipo de género")
 
     class Meta:
         verbose_name = "nave"
-        verbose_name_plural = "naves"
 
     def __str__(self):
         return self.name
+
+class Lab(Agent):
+    class Meta:
+        verbose_name = "Laboratorio"
+
+class Analysis(models.Model):
+    date = models.DateField("fecha")
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.PROTECT, verbose_name="Nave", null=True, blank=True)
+    entry = models.ForeignKey("purchases.Entry", on_delete=models.PROTECT, verbose_name="Entrada", null=True, blank=True)
+    lab = models.ForeignKey(Lab, on_delete=models.PROTECT, verbose_name="laboratorio")
+
+    class Meta:
+        verbose_name = "Análisis"
+        verbose_name_plural = "Análisis"
 
 
 

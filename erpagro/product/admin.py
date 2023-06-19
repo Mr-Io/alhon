@@ -4,7 +4,7 @@ from .models import AgrofoodFamily, AgrofoodType, AgrofoodSubfamily
 
 ########### AGROFOOD TYPE ############
 class AgrofoodTypeAdmin(admin.ModelAdmin):
-    fields = [("subfamily"), ("name", "quality"), "price_min"]
+    fields = [("subfamily"), ("name", "quality"), ("packaging"), "price_min"]
     list_display = ["__str__", "quality", "price_min"]
     list_filter = ["subfamily__family", "quality"]
     search_fields = ["name"]

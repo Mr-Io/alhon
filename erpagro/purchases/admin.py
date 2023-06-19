@@ -1,23 +1,22 @@
 from django.contrib import admin
-from django.http.request import HttpRequest
 
 from .models import Supplier, SupplierGroup, Entry, EntryNote, Invoice, CarrierAgent, Charge
-from packaging.models import Transaction
 from base.admin import AgentAdmin 
-# Register your models here.
+from quality.admin import LandInline
 
-
-########### CARRIER AGENT ############
+########### CARRIERAGENT ############
 class CarrierAgentAdmin(AgentAdmin):
     fieldsets = AgentAdmin.fieldsets + [("Costes", {"fields": [("carrier_price")]})]
 
 ########### SUPPLIER ############
 class SupplierAdmin(AgentAdmin):
     fieldsets = AgentAdmin.fieldsets + [("Agrupación", {"fields": [("group", "share")]}),
-                                        ("Gastos", {"fields": [("charge"), ("carrier", "carrier_price")]}),
+                                        ("Gastos", {"fields": [("charge"), ("carrier")]}),
                                         ]
                                        
     list_display = AgentAdmin.list_display + ["group", "share", "carrier"]
+
+    inlines = AgentAdmin.inlines + [LandInline]
 
 ########### SUPPLIER GROUP ############
 class SupplierInline(admin.TabularInline):
@@ -38,10 +37,10 @@ class SuplierGroupAdmin(admin.ModelAdmin):
 ########### ENTRY ############
 
 class EntryAdmin(admin.ModelAdmin):
-    fields = [("warehouse"), ("agrofood", "weight"), ("packaging_transaction"),("entry_note",), ("price",)] 
-    date_hierarchy = "entry_note__creation_date"
-    list_display = ["entry_note", "agrofood", "weight", "price", "total_price"]
-    search_fields = ["agrofood", "entry_note__supplier", "weight"]
+    fields = [("warehouse"), ("agrofood", "weight"), ("packaging_transaction"),("entrynote",), ("price",)] 
+    date_hierarchy = "entrynote__creation_date"
+    list_display = ["entrynote", "agrofood", "weight", "price", "total_price"]
+    search_fields = ["agrofood", "entrynote__supplier", "weight"]
 
 ########### ENTRY NOTE ############
 
