@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from base.models import Agent, EntryExitAbstract
 from product.models import AgrofoodType
@@ -76,10 +77,16 @@ class EntryNote(ExpensesAbstract, ExpenseCarrierPriceAbstract):
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name="fecha")
     invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="entrynotes", blank = True, null=True, verbose_name="factura")
     charge = models.ForeignKey(Charge, on_delete=models.PROTECT, verbose_name="tarifa")
+    registered = models.BooleanField("registrado", default=False)
 
-    @admin.display(boolean=True)
+    def save(self, *args, **kwargs):
+        if self.registered and not self.priced():
+            raise ValidationError("Solo se pueden registrar albaranes valorados")
+        return super().save(*args, **kwargs)
+
+    @admin.display(boolean=True, description="valorado")
     def priced(self):
-        return all(x.price_per_kg for x in self.entries.all())
+        return all(e.price for e in self.entry_set.all())
 
     class Meta:
         verbose_name = "Albarán"
@@ -97,7 +104,7 @@ class Entry(EntryExitAbstract):
     @admin.display(description="precio total")
     def total_price(self):
         return self.price * self.weight if self.price else "-"
-
+    
     class Meta:
         verbose_name = "entrada"
 

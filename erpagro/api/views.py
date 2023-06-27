@@ -4,13 +4,13 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from packaging.models import Packaging
+from packaging.models import Packaging, Transaction
 from product.models import AgrofoodType
-from purchases.models import Supplier, CarrierAgent, Charge
+from purchases.models import Supplier, CarrierAgent, Charge, Entry
 from quality.models import Land, Warehouse
 
 
-#################### AGROFOODTYPE ####################
+#################### PACKAGING ####################
 class PackagingTypeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Packaging
@@ -42,7 +42,6 @@ class WarehouseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Warehouse
         fields = ["name", "agrofoodtypes"]
-
 
 #################### CARRIERAGENT ####################
 class CarrierAgentListSerializer(serializers.ModelSerializer):
@@ -82,7 +81,23 @@ class SupplierDetailSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = ["name", "cif", "mobile", "carrier", "charge", "land_set"]
 
-######################## VIEWS ########################
+#################### TRANSACTION ####################
+class TransactionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ["pk"]
+
+#################### ENTRY ####################
+class EntryDetailSerializer(serializers.ModelSerializer):
+    warehouse = WarehouseListSerializer(read_only=True)
+    agrofood = AgrofoodTypeListSerializer(read_only=True)
+    packaging_transaction = TransactionListSerializer(read_only=True)
+    class Meta:
+        model = Entry
+        fields= ["weight", "price", "warehouse", "agrofood", "packaging_transaction"]
+
+
+######################## VIEW SUPPLIERS ########################
 
 @api_view(["GET"])
 @permission_required(["purchases.view_supplier"], raise_exception=True)
@@ -108,6 +123,7 @@ def supplier_detail(request, pk):
             return Response(serializer.data)
         return Response({"detail": "Permisos Insuficientes"}, status=status.HTTP_403_FORBIDDEN)
 
+######################## VIEW WAREHOUSE ########################
 
 @api_view(["GET"])
 @permission_required(["quality.view_warehouse"], raise_exception=True)
@@ -121,6 +137,7 @@ def warehouse_detail(request, pk):
         serializer = WarehouseDetailSerializer(warehouse)
         return Response(serializer.data)
 
+######################## VIEW AGROFOODTYPE ########################
 
 @api_view(["GET"])
 @permission_required(["product.view_agrofoodtype"], raise_exception=True)
@@ -134,6 +151,7 @@ def agrofoodtype_detail(request, pk):
         serializer = AgrofoodTypeDetailSerializer(agrofoodtype)
         return Response(serializer.data)
 
+######################## VIEW CARRIERAGENT ########################
 
 @api_view(["GET"])
 @permission_required(["product.view_agrofoodtype"], raise_exception=True)
@@ -146,3 +164,23 @@ def carrier_detail(request, pk):
     if request.method == "GET":
         serializer = CarrierAgentDetailSerializer(carrier)
         return Response(serializer.data)
+
+######################## VIEW ENTRY ########################
+@api_view(["GET", "POST", "PUT"])
+@permission_required(["purchases.change_entry"], raise_exception=True)
+def entry_detail(request, pk):
+    try:
+        entry = Entry.objects.get(pk=pk)
+    except Entry.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "GET":
+        serializer = EntryDetailSerializer(entry)
+        return Response(serializer.data)
+    
+    if request.method == "POST" or request.method == "PUT":
+        serializer = EntryDetailSerializer(entry, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response({"errors": serializer.errors} | EntryDetailSerializer(entry).data, status=status.HTTP_400_BAD_REQUEST)

@@ -1,12 +1,17 @@
 import decimal
 from utils.func import convert_dotted_json 
 
+from django.core import serializers
 from django.db import transaction
-from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
+from django.utils import timezone
+
 
 from rest_framework import status
+
+from api.views import EntryDetailSerializer
 
 from django.contrib.auth.decorators import permission_required
 
@@ -69,6 +74,7 @@ def entry(request):
                         t = Transaction(agent=supplier, packaging=pallet, number=pallet_data["numpallets"])
                         t.full_clean()
                         t.save()
+            entry.weight = round(entry.weight)
             entry.full_clean()
             entry.save()
         #return JsonResponse(post, safe=False)
@@ -77,3 +83,21 @@ def entry(request):
                                                                 "boxes": boxes,
                                                                 "pallets": pallets,
                                                                 "message": f"Entrada de género de {supplier.name} guardada con éxito",})
+                                                            
+
+@permission_required("purchases.change_entry")
+def entries(request):
+    if request.method == "GET":
+        entries = Entry.objects.filter(entrynote__registered=False)
+        return render(request, "purchases/entries.html", {"entries": entries})
+    
+    if request.method == "POST":
+        entries = Entry.objects.filter(Q(pk__in = request.POST.keys()) & Q(price__isnull = False))
+        for e in entries:
+            entrynote = e.entrynote
+            if not entrynote.registered and entrynote.priced():
+                entrynote.registered = True
+                entrynote.creation_date = timezone.now()
+                entrynote.save()
+        serializer = EntryDetailSerializer(entries, many=True)
+        return JsonResponse(serializer.data, safe=False)

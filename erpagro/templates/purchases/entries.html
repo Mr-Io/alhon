@@ -1,0 +1,61 @@
+{% extends "base/base.html" %}
+
+{% load static %}
+
+{% block head %}
+<script src="{% static 'frontend/entries.js' %}"></script>
+{% endblock head %}
+
+{% block section %}
+
+{% csrf_token %}
+<div class="container-fluid mt-3">
+    {% if message %}
+    <div id="message" class="row mb-2">
+        <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ message
+            }}</p>
+    </div>
+    {% endif %}
+    <table id="entry-table" class="table table-sm table-striped table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Albarán</th>
+                <th scope="col">Precio (€/kg)</th>
+                <th scope="col">Peso neto (kg)</th>
+                <th scope="col">Género</th>
+                <th scope="col">Agricultor</th>
+                <th scope="col">Fecha</th>
+            </tr>
+        </thead>
+
+        <body>
+            {% for e in entries %}
+            <tr data-url="{% url 'admin:purchases_entry_change' e.pk %}" data-pk="{{ e.pk }}" class="entry-row">
+                <td>{{ e.entrynote.pk }}</td>
+                <td id="price-box">
+                    {% if e.price %}
+                    <div id="price-noform">{{ e.price|floatformat:2 }}</div>
+                    {% else %}
+                    <div id="price-noform"> - </div>
+                    {% endif %}
+                    <form id="price-form" class="form-inline" style="display:none">
+                        <input hidden name="entry-pk" value="{{ e.pk }}">
+                        <input name="price" id="price-value" type="number" class="form-control col-8"
+                            step="0.01" min="0" autocomplete="off" value="{% if e.price %}{{ e.price|floatformat:2 }}{% endif %}" selected>
+                        <input class="form-control" type="submit" value="guardar">
+                    </form>
+                </td>
+                <td>{{ e.weight }}</td>
+                <td>{{ e.agrofood.name }} {{ e.agrofood.quality}} </td>
+                <td>{{ e.entrynote.supplier }} </td>
+                <td>{{ e.creation_date|date:"d/m/Y H:i"}} </td>
+            </tr>
+            {% endfor %}
+    </table>
+    <div class="row mb-2">
+        <div class="col">
+            <button id="register-all" class="btn btn-primary">Actualizar</button>
+        </div>
+    </div>
+</div>
+{% endblock section %}

@@ -50,11 +50,11 @@ class EntryInline(admin.TabularInline):
     extra = 0
 
 class EntryNoteAdmin(admin.ModelAdmin):
-    fields = [("supplier", "charge"), ("carrier", "carrier_price"), ("invoice") ]
+    fields = [("supplier", "charge"), ("carrier", "carrier_price"), ("registered"), ("invoice") ]
     date_hierarchy = "creation_date"
-    list_display = ["pk", "creation_date", "supplier", "invoice"]
+    list_display = ["pk", "creation_date", "supplier", "invoice", "priced", "registered"]
     search_fields = ["supplier"]
-    list_filter = ["creation_date"]
+    list_filter = ["registered", "creation_date"]
 
     inlines = [EntryInline]
 

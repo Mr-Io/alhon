@@ -20,5 +20,6 @@ from . import views
 
 app_name = "purchases"
 urlpatterns = [
-    path("entry", views.entry, name="entry"),
+    path("entry/", views.entry, name="entry"),
+    path("entries/", views.entries, name="entries"),
 ]
