@@ -29,9 +29,9 @@ class Contact(Agent):
 
 class EntryExitAbstract(models.Model):
     weight = models.DecimalField("peso neto", decimal_places=0, max_digits=8)
-    price = models.DecimalField("precio por kg", decimal_places=4, max_digits=8, blank=True, null=True)
+    price = models.DecimalField("precio por kg", decimal_places=2, max_digits=6, blank=True, null=True)
     creation_date = models.DateTimeField("fecha", auto_now_add=True)
-    packaging_transaction = models.OneToOneField("packaging.Transaction", on_delete=models.PROTECT)
+    packaging_transaction = models.OneToOneField("packaging.Transaction", on_delete=models.PROTECT, blank=True, null=True)
 
     class Meta:
         abstract = True

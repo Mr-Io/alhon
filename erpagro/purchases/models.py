@@ -80,13 +80,30 @@ class EntryNote(ExpensesAbstract, ExpenseCarrierPriceAbstract):
     registered = models.BooleanField("registrado", default=False)
 
     def save(self, *args, **kwargs):
-        if self.registered and not self.priced():
-            raise ValidationError("Solo se pueden registrar albaranes valorados")
+        if self.registered:
+            if not self.priced():
+                raise ValidationError("Intento de registro de albarán sin valorar")
+            if self.pending(): 
+                raise ValidationError("Intento de registro de albarán con kg de alguna entrada sin vender") 
+            if not self.all_exit_priced():
+                raise ValidationError("Intento de registro de albarán con kg de alguna entrada sin precio de venta")
+            if self.in_warehouse():
+                raise ValidationError("Intento de registro de albarán con kg de alguna entrada todavía en almacén")
         return super().save(*args, **kwargs)
 
     @admin.display(boolean=True, description="valorado")
     def priced(self):
         return all(e.price for e in self.entry_set.all())
+    
+    @admin.display(boolean=True, description="vendido")
+    def all_exit_priced(self):
+        return all(e.all_exit_priced() for e in self.entry_set.all())
+
+    def pending(self):
+        return sum(e.pending() for e in self.entry_set.all())
+    
+    def in_warehouse(self):
+        return sum(e.in_warehouse() for e in self.entry_set.all())
 
     class Meta:
         verbose_name = "Albarán"
@@ -104,6 +121,23 @@ class Entry(EntryExitAbstract):
     @admin.display(description="precio total")
     def total_price(self):
         return self.price * self.weight if self.price else "-"
+    
+    @admin.display(description="sin vender")
+    def pending(self, ignore=None):
+        exits = self.exit_set.exclude(pk=ignore.pk) if ignore else self.exit_set.all()
+        return self.weight - sum(exit.weight for exit in exits)
+    
+    @admin.display(description="bultos pendientes")
+    def pending_packages(self):
+        return self.packaging_transaction.number + sum(exit.packaging_transaction.number for exit in self.exit_set.all())
+    
+    @admin.display(description="vendido con precio")
+    def all_exit_priced(self):
+        return all(e.price for e in self.exit_set.all())
+
+    @admin.display(description="en almacén")
+    def in_warehouse(self):
+        return self.weight - sum(exit.weight if not exit.in_warehouse else 0 for exit in self.exit_set.all())
     
     class Meta:
         verbose_name = "entrada"

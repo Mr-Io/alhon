@@ -26,4 +26,6 @@ urlpatterns = [
     path("agrofoodtypes/<int:pk>/", views.agrofoodtype_detail, name="agrofoodtype-detail"),
     path("carriers/<int:pk>/", views.carrier_detail, name="carrier-detail"),
     path("entries/<int:pk>/", views.entry_detail, name="entry-detail"),
+    path("exits/", views.exit_list, name="exit-list"),
+    path("exits/<int:pk>/", views.exit_detail, name="exit-detail"),
 ]

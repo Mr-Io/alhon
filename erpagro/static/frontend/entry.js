@@ -145,12 +145,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 carrier_pk.value = supplierdata.carrier ? supplierdata.carrier.pk : "";
                 carrier_price.value = supplierdata.carrier && supplierdata.carrier.carrier_price ? parseFloat(supplierdata.carrier.carrier_price) : "";
                 carrier_pk.oninput = () => {
-                    fetch(`/api/carriers/${carrier_pk.value}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        carrier_price.value = data.carrier_price ? parseFloat(data.carrier_price) : "";
-                    })
-                    .catch(error => {console.log(error)});
+                    carrier_price.value = "";
+                    if (carrier_pk.value){
+                        fetch(`/api/carriers/${carrier_pk.value}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            carrier_price.value = data.carrier_price ? parseFloat(data.carrier_price) : "";
+                        })
+                        .catch(error => {console.log(error)});
+                    }
                 }
                 // change warehouses input on each entry
                 let warehouse = document.querySelector("#warehouse-pk");

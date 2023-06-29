@@ -1,8 +1,6 @@
 import decimal
 from utils.func import convert_dotted_json 
 
-from django.core import serializers
-from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
@@ -22,7 +20,6 @@ from product.models import AgrofoodType
 # Create your views here.
 
 
-@transaction.atomic
 @permission_required("purchases.add_entry")
 def entry(request):
     suppliers = Supplier.objects.all()
@@ -88,7 +85,7 @@ def entry(request):
 @permission_required("purchases.change_entry")
 def entries(request):
     if request.method == "GET":
-        entries = Entry.objects.filter(entrynote__registered=False)
+        entries = Entry.objects.filter(entrynote__invoice__isnull=True)
         return render(request, "purchases/entries.html", {"entries": entries})
     
     if request.method == "POST":

@@ -55,7 +55,9 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Ventas</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Venta</a></li>
+            {% if perms.purchases.view_entry and perms.sales.view_exit %}
+            <li><a class="dropdown-item" href="{% url 'sales:listin' %}">Listín</a></li>
+            {% endif %}
             <li><a class="dropdown-item" href="#">Salida</a></li>
             <li><a class="dropdown-item" href="#">Listado</a></li>
             {% if request.user.is_staff %}

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "accounting.apps.AccountingConfig",
     "accounts.apps.AccountsConfig",
     "rest_framework",
+    "mathfilters",
     "frontend.apps.FrontendConfig",
     'django.contrib.admin',
     'django.contrib.auth',
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "django.contrib.humanize",
 ]
 
 MIDDLEWARE = [
@@ -146,3 +148,7 @@ REST_FRAMEWORK = {
 # default User
 
 AUTH_USER_MODEL = "accounts.User"
+
+# ATOMIC REQUEST
+
+ATOMIC_REQUEST = True

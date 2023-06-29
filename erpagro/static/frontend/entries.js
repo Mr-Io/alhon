@@ -5,12 +5,18 @@ const number_options = {
 document.addEventListener("DOMContentLoaded", () => {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let table = new DataTable('#entry-table', {
-        "scrollY": "60vh",
-        "scrollCollapse": true,
-        "paging": false,
-        columnDefs: [{
-            targets: "_all",
-            className: 'dt-right',}]
+        paging: false,
+        orderFixed: [[5, 'asc']],
+        fixedHeader: true,
+        rowGroup: { 
+            dataSrc: row => {
+                let base = row[6];
+                return base;
+            },
+        },
+        //stateSave: true,
+        //scrollY: '70vh',
+        //scrollCollapse: true,
     });
 
     document.querySelectorAll(".entry-row").forEach(row => {
@@ -18,9 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
         let price_form = row.querySelector("#price-form");
         let price_box = row.querySelector("#price-box")
         let price_input = price_form.querySelector("#price-value");
-        row.onclick = () => {
-            window.open(row.dataset.url, "_blank")
-        };
         price_box.onclick = (event) => {
             price_form.style.display = "";
             price_input.focus();

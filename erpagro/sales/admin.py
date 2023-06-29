@@ -49,15 +49,6 @@ class InvoiceAdmin(admin.ModelAdmin):
 
     inlines = [ExitInline]
 
-    def has_add_permission(*__) -> bool:
-        return False
-
-    def has_change_permission(*__)-> bool:
-        return False
-
-    def has_delete_permission(*__)-> bool:
-        return False
-
 
 admin.site.register(Client, ClientAdmin)
 admin.site.register(Exit, ExitAdmin)

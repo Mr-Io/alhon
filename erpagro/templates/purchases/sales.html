@@ -1,0 +1,145 @@
+{% extends "base/base.html" %} {% load static %} {% load mathfilters %} {% block head %}
+<script src="{% static 'frontend/sales.js' %}"></script>
+{% endblock head %} {% block section %} {% csrf_token %}
+
+<table style="display: none">
+    <tr>
+        <td id="formrow-forclone">
+            <div id="client-price-noform">price</div>
+            <form id="client-price-form" style="display: none" class="form-inline">
+                <input name="client-price" id="client-price-input" type="number" class="form-control col-8" step="0.01"
+                    min="0" autocomplete="off" value="price" selected />
+                <input class="form-control" type="submit" value="guardar" />
+            </form>
+        </td>
+    </tr>
+</table>
+
+<div class="container-fluid mt-3">
+    {% if message %}
+    <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ message }}
+    </p>
+    {% endif %}
+    <form id="agrofood-form" method="POST" class="row">
+        {% csrf_token %}
+        <select id="agrofood-pk" name="agrofood-pk" class="form-select">
+            <option hidden>SELECCIONAR PRODUCTO</option>
+            {% for a in aftypes %}
+            {% if a.pk|stringformat:'s' == agrofood_pk|stringformat:'s' %}
+            <option value="{{ a.pk }}" selected>{{ a.name }} {{ a.quality }}</option>
+            {% else %}
+            <option value="{{ a.pk }}">{{ a.name }} {{ a.quality }}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+        <input type="submit" hidden value="ir" />
+    </form>
+</div>
+<table class="table table-bordered table-sm table-hover align-middle">
+    <thead>
+        <tr class="table-secondary">
+            <th>Entrada</th>
+            <th>Agricultor</th>
+            <th>Bultos Sin Vender</th>
+            <th>Kg Sin Vender</th>
+            <th>Precio compra</th>
+            <th>Cliente</th>
+            <th>Bultos Venta</th>
+            <th>Kg Venta</th>
+            <th>Precio venta</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% now "z" as todays_date %} {% for e in entries %} {% if e.creation_date|date:"z" == todays_date %}
+        <tr class="main-row-exit">
+            {% else %}
+        </tr>
+
+        <tr class="main-row-exit table-danger">
+            {% endif %}
+            <td id="pk-cell" rowspan="{{ e.exit_set.all|length|add:'1' }}"><a {% if perms.sales.change_exit %}
+                    href="{% url 'admin:purchases_entry_change' e.pk %}" {% endif %} target="_blank">{{ e.pk }}</a></td>
+            <td id="supplier-cell" rowspan="{{ e.exit_set.all|length|add:'1' }}">{{ e.entrynote.supplier.name }}</td>
+            <td id="pending-packages-cell" rowspan="{{ e.exit_set.all|length|add:'1' }}">{{ e.pending_packages }}</td>
+            <td id="pending-cell" rowspan="{{ e.exit_set.all|length|add:'1' }}">{{ e.pending }}</td>
+            <td id="price-cell" rowspan="{{ e.exit_set.all|length|add:'1' }}">
+                <div id="supplier-price-noform">{% if e.price %} {{ e.price }} {% else %} - {% endif%}</div>
+                <form style="display: none" id="supplier-price-form" class="form-inline">
+                    <input hidden name="entry-pk" value="{{ e.pk }}" />
+                    <input name="supplier-price" id="supplier-price-input" type="number" class="form-control col-8"
+                        step="0.01" min="0" autocomplete="off"
+                        value="{% if e.price %}{{ e.price|floatformat:2 }}{% endif %}" selected />
+                    <input class="form-control" type="submit" value="guardar" />
+                </form>
+            </td>
+            {% if e.pending > 0 %}
+            <td colspan="4">
+                <div class="text-center">
+                    <button id="add-sale-btn" data-bultos="" data-kg="" class="btn btn-link p-0">Añadir Venta</button>
+                </div>
+                <form id="add-sale-form" style="display: none" class="container-fluid">
+                    <input hidden name="entry" value="{{e.pk}}" />
+                    <input hidden name="packaging-type" value="{{e.packaging_transaction.packaging.pk}}" />
+                    <div class="row mb-1">
+                        <label class="form-label col-sm-3 col-form-label">Cliente</label>
+                        <select name="client" id="client-select" class="form-control col">
+                            <option></option>
+                            {% for client in clients %}
+                            <option value="{{ client.pk }}">{{ client.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row mb-1">
+                        <label form="pending-packages-input" class="form-label col-sm-3 col-form-label">Bultos</label>
+                        <input id="pending-packages-input" type="number" class="form-control col" step="1" min="0"
+                            max="{{ e.pending_packages }}" />
+                    </div>
+                    <div class="row mb-1">
+                        <label for="pending-input" class="form-label col-sm-3 col-form-label">Kg</label>
+                        <input name="weight" type="number" id="pending-input" class="form-control col" step="1" min="0"
+                            max="{{e.pending}}" />
+                    </div>
+                    <div class="row mb-1">
+                        <label for="price-input" class="form-label col-sm-3 col-form-label">Precio</label>
+                        <input id="price-input" type="number" class="form-control col" step="0.01" min="0" />
+                    </div>
+                    <div class="row mb-1">
+                        <input type="submit" class="form-control" value="Realizar Venta" />
+                    </div>
+                </form>
+            </td>
+            {% else %}
+            <td colspan="4" style="display: none"></td>
+            {% endif %}
+        </tr>
+        {% for ex in e.exit_set.all %} {% if e.creation_date|date:"z" == todays_date %}
+        <tr class="sale-row" id="sale-row">
+            {% else %}
+        </tr>
+
+        <tr class="sale-row table-danger" data-exit-pk="{{ ex.pk }}" id="sale-row">
+            {% endif %}
+            <td>{{ ex.client }}</td>
+            <td>{{ ex.packaging_transaction.number|abs }}</td>
+            <td>{{ ex.weight }}</td>
+            <td>
+                <div id="client-price-noform">{% if ex.price %} {{ ex.price }} {% else %} - {% endif %}</div>
+                <form id="client-price-form" style="display: none" class="form-inline">
+                    <input hidden name="exit-pk" value="{{ ex.pk }}" />
+                    <input name="client-price" id="client-price-input" type="number" class="form-control col-8"
+                        step="0.01" min="0" autocomplete="off" value="{% if ex.price %}{{ ex.price }}{% endif %}"
+                        selected />
+                    <input class="form-control" type="submit" value="guardar" />
+                </form>
+            </td>
+        </tr>
+        {% endfor %} {% endfor %}
+    </tbody>
+</table>
+<div class="row mb-2">
+    <div class="col">
+        <button id="register-all" class="btn btn-primary">Actualizar</button>
+    </div>
+</div>
+</div>
+{% endblock section %}

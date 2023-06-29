@@ -3,6 +3,7 @@ from django.contrib import admin
 from .models import Supplier, SupplierGroup, Entry, EntryNote, Invoice, CarrierAgent, Charge
 from base.admin import AgentAdmin 
 from quality.admin import LandInline
+from sales.models import Exit
 
 ########### CARRIERAGENT ############
 class CarrierAgentAdmin(AgentAdmin):
@@ -35,12 +36,18 @@ class SuplierGroupAdmin(admin.ModelAdmin):
     inlines = [SupplierInline]
 
 ########### ENTRY ############
+class ExitInline(admin.TabularInline):
+    model = Exit
+    extra = 0
 
 class EntryAdmin(admin.ModelAdmin):
     fields = [("warehouse"), ("agrofood", "weight"), ("packaging_transaction"),("entrynote",), ("price",)] 
     date_hierarchy = "entrynote__creation_date"
-    list_display = ["entrynote", "agrofood", "weight", "price", "total_price"]
+    list_display = ["pk","entrynote", "agrofood", "weight", "in_warehouse", "pending", "price", "total_price"]
     search_fields = ["agrofood", "entrynote__supplier", "weight"]
+    list_filter = ["agrofood"]
+
+    inlines = [ExitInline]
 
 ########### ENTRY NOTE ############
 
@@ -71,12 +78,6 @@ class InvoiceAdmin(admin.ModelAdmin):
     list_filter = ["creation_date", "settled", "paid"]
 
     inlines = [EntryNoteInline]
-
-    def has_add_permission(*args) -> bool:
-        return False
-
-    def has_change_permission(*args) -> bool:
-        return False
 
 
 ########### INVOICE ############
