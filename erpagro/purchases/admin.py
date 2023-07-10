@@ -43,7 +43,7 @@ class ExitInline(admin.TabularInline):
 class EntryAdmin(admin.ModelAdmin):
     fields = [("warehouse"), ("agrofood", "weight"), ("packaging_transaction"),("entrynote",), ("price",)] 
     date_hierarchy = "entrynote__creation_date"
-    list_display = ["pk","entrynote", "agrofood", "weight", "in_warehouse", "pending", "price", "total_price"]
+    list_display = ["pk","entrynote", "agrofood", "weight", "in_warehouse", "pending", "price", "base_amount"]
     search_fields = ["agrofood", "entrynote__supplier", "weight"]
     list_filter = ["agrofood"]
 
@@ -72,9 +72,10 @@ class EntryNoteInline(admin.TabularInline):
     fields = EntryNoteAdmin.fields
 
 class InvoiceAdmin(admin.ModelAdmin):
-    fields = ["settled", "paid"]
+    fields = ["supplier", "settled", "paid"]
     date_hierarchy = "creation_date"
-    list_display = ["pk", "creation_date", "settled", "paid"]
+    readonly_fields = ["base_amount"]
+    list_display = ["pk", "supplier", "base_amount", "settled", "paid", "creation_date",]
     list_filter = ["creation_date", "settled", "paid"]
 
     inlines = [EntryNoteInline]

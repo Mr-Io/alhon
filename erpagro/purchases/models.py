@@ -64,6 +64,26 @@ class Invoice(models.Model):
     settled = models.BooleanField("liquidada", default=False)
     paid = models.BooleanField("pagada", default=False)
     creation_date = models.DateTimeField("fecha", auto_now_add=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT)
+
+    # base amount 
+    @admin.display(description="importe base")
+    def base_amount(self):
+        return sum(en.base_amount() for en in self.entrynotes.all())
+    
+    def clean(self):
+        if self.pk:
+            if not self.entrynotes.exists():
+                raise ValidationError("La factura no tiene ningún albarán asociado")
+            for en in self.entrynotes.all():
+                if en.supplier != self.supplier:
+                    raise ValidationError("Diferencias de agricultores entre la factura y algún albarán")
+                if not en.entry_set.exists():
+                    raise ValidationError("Alguno de los albaranes no tiene ninguna entrada")
+                if not en.priced():
+                    raise ValidationError("Alguno de los albaranes no está valorado")
+        return super().clean()
+
 
     class Meta:
         verbose_name = "Factura"
@@ -73,23 +93,27 @@ class Invoice(models.Model):
 
 
 class EntryNote(ExpensesAbstract, ExpenseCarrierPriceAbstract):
-    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name="entrynotes", verbose_name="agricultor")
+    supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, verbose_name="agricultor")
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name="fecha")
-    invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="entrynotes", blank = True, null=True, verbose_name="factura")
+    invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, related_name="entrynotes", blank = True, null=True, verbose_name="factura")
     charge = models.ForeignKey(Charge, on_delete=models.PROTECT, verbose_name="tarifa")
     registered = models.BooleanField("registrado", default=False)
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self.registered:
+            if not self.id:
+                raise ValidationError({"registered": "Los albaranes recien creados no pueden estar registrados"})
+            if not self.entry_set.exists():
+                raise ValidationError({"registered": "albarán sin entradas"})
             if not self.priced():
-                raise ValidationError("Intento de registro de albarán sin valorar")
+                raise ValidationError({"registered":"albarán no valorado"})
             if self.pending(): 
-                raise ValidationError("Intento de registro de albarán con kg de alguna entrada sin vender") 
+                raise ValidationError({"registered":"kg de alguna entrada sin vender"}) 
             if not self.all_exit_priced():
-                raise ValidationError("Intento de registro de albarán con kg de alguna entrada sin precio de venta")
+                raise ValidationError({"registered":"kg de alguna entrada sin precio de venta"})
             if self.in_warehouse():
-                raise ValidationError("Intento de registro de albarán con kg de alguna entrada todavía en almacén")
-        return super().save(*args, **kwargs)
+                raise ValidationError({"registered":"kg de alguna entrada todavía en almacén"})
+        return super().clean()
 
     @admin.display(boolean=True, description="valorado")
     def priced(self):
@@ -104,6 +128,9 @@ class EntryNote(ExpensesAbstract, ExpenseCarrierPriceAbstract):
     
     def in_warehouse(self):
         return sum(e.in_warehouse() for e in self.entry_set.all())
+    
+    def base_amount(self):
+        return sum(e.base_amount() for e in self.entry_set.all())
 
     class Meta:
         verbose_name = "Albarán"
@@ -118,9 +145,9 @@ class Entry(EntryExitAbstract):
     agrofood = models.ForeignKey(AgrofoodType, on_delete=models.PROTECT, verbose_name="género")
 
     #price - precio total
-    @admin.display(description="precio total")
-    def total_price(self):
-        return self.price * self.weight if self.price else "-"
+    @admin.display(description="importe base")
+    def base_amount(self):
+        return self.price * self.weight if self.price else None
     
     @admin.display(description="sin vender")
     def pending(self, ignore=None):

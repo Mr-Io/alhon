@@ -24,7 +24,7 @@
             <li><a class="dropdown-item" href="{% url 'purchases:entries' %}">Listado</a></li>
             {% endif %}
             {% if perms.purchases.add_invoice %}
-            <li><a class="dropdown-item" href="#">Facturar</a></li>
+            <li><a class="dropdown-item" href="{% url 'purchases:invoice' %}">Facturar</a></li>
             {% endif %}
             {% if perms.purchases.change_invoice %}
             <li><a class="dropdown-item" href="#">Liquidación</a></li>
@@ -124,6 +124,14 @@
     </div>
   </div>
 </nav>
+
+<div class="container-sm mt-3">
+    {% if msg %}
+    <div id="message" class="row mb-2">
+        <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ msg }}</p>
+    </div>
+    {% endif %}
+</div>
 {% block section %}
 {% endblock %}
 {% endblock %}

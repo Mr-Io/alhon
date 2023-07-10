@@ -15,13 +15,13 @@ def listin(request):
         agrofood_set.add(e.agrofood)
 
     if request.method == "GET":
-        return render(request, "purchases/sales.html", {"aftypes": agrofood_set})
+        return render(request, "sales/listin.html", {"aftypes": agrofood_set})
 
     if request.method == "POST":
         agrofood_pk = request.POST["agrofood-pk"]
         entries = entries.filter(agrofood__pk = agrofood_pk) #todo: which entries should be displayed
         clients = Client.objects.all()
-        return render(request, "purchases/sales.html", {"entries": entries, 
-                                                        "aftypes": agrofood_set,
-                                                        "agrofood_pk": agrofood_pk,
-                                                        "clients": clients,})
+        return render(request, "sales/listin.html", {"entries": entries, 
+                                                    "aftypes": agrofood_set,
+                                                    "agrofood_pk": agrofood_pk,
+                                                    "clients": clients,})

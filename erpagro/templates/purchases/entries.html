@@ -1,77 +1,56 @@
-{% extends "base/base.html" %}
-
-{% load static %}
-{% load humanize %}
-
-{% block head %}
+{% extends "base/base.html" %} 
+{% load static %} 
+{% load base_filters %}
+{% load humanize %} {% block head %}
 <script src="{% static 'frontend/entries.js' %}"></script>
-{% endblock head %}
-
-{% block section %}
-
-{% csrf_token %}
+{% endblock head %} {% block section %} {% csrf_token %}
 <div class="container-fluid mt-3">
     {% if message %}
     <div id="message" class="row mb-2">
-        <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ message
-            }}</p>
+        <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ message }}</p>
     </div>
+    {% endif %}
+    <table id="entry-table" class="display" style="width: 100%">
+        <thead>
+            <tr>
+                <th>Albarán</th>
+                <th>Precio (€/kg)</th>
+                <th>Peso neto (kg)</th>
+                <th>Género</th>
+                <th>Agricultor</th>
+                <th hidden>Fecha</th>
+                <th hidden>Día</th>
+                <th>Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in entries %}
+            <tr data-pk="{{ e.pk }}" class="entry-row">
+                <td><a target="_blank" {% if perms.purchases.change_entrynote %} href="{% url 'admin:purchases_entrynote_change' e.entrynote.pk %}" {% endif %}> {{ e.entrynote.pk }} </a></td>
+                <td id="price-box">
+                    {% if e.price %}
+                    <div id="price-noform">{{ e.price|floatformat:2 }}</div>
+                    {% else %}
+                    <div id="price-noform">-</div>
+                    {% endif %}
+                    <form id="price-form" class="form-inline" style="display: none">
+                        <input hidden name="entry-pk" value="{{ e.pk }}" />
+                        <input name="price" id="price-value" type="number" class="form-control col-8" step="0.01" min="0" autocomplete="off" value="{% if e.price %}{{ e.price|floatformat:2 }}{% endif %}" selected />
+                        <input class="form-control" type="submit" value="guardar" />
+                    </form>
+                </td>
+                <td>{{ e.weight }}</td>
+                <td>{{ e.agrofood.name }} {{ e.agrofood.quality}}</td>
+                <td>{{ e.entrynote.supplier }}</td>
+                <td hidden>{{ e.creation_date|date:"Y/m/d"}}</td>
+                <td hidden>
+                    {{e.creation_date|normalday }} 
+                </td>
+                <td>{{ e.creation_date|date:"H:i"}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
-{% endif %}
-<table id="entry-table" class="display" style="width: 100%;">
-    <thead>
-        <tr>
-            <th>Albarán</th>
-            <th>Precio (€/kg)</th>
-            <th>Peso neto (kg)</th>
-            <th>Género</th>
-            <th>Agricultor</th>
-            <th hidden>Fecha</th>
-            <th hidden>Día</th>
-            <th>Hora</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for e in entries %}
-        <tr data-pk="{{ e.pk }}" class="entry-row">
-            <td><a target="_blank" 
-                {% if perms.purchases.change_entrynote %}
-                href="{% url 'admin:purchases_entrynote_change' e.entrynote.pk %}"
-                {% endif %}
-                >{{ e.entrynote.pk }}</a></td>
-            <td id="price-box">
-                {% if e.price %}
-                <div id="price-noform">{{ e.price|floatformat:2 }}</div>
-                {% else %}
-                <div id="price-noform"> - </div>
-                {% endif %}
-                <form id="price-form" class="form-inline" style="display:none">
-                    <input hidden name="entry-pk" value="{{ e.pk }}">
-                    <input name="price" id="price-value" type="number" class="form-control col-8" step="0.01" min="0"
-                        autocomplete="off" value="{% if e.price %}{{ e.price|floatformat:2 }}{% endif %}" selected>
-                    <input class="form-control" type="submit" value="guardar">
-                </form>
-            </td>
-            <td>{{ e.weight }}</td>
-            <td>{{ e.agrofood.name }} {{ e.agrofood.quality}} </td>
-            <td>{{ e.entrynote.supplier }} </td>
-            <td hidden>{{ e.creation_date|date:"Y/m/d"}} </td>
-            <td hidden>
-                {% with "hoy ayer" as list %}
-                {% if  e.creation_date|naturalday in list.split %} {{ e.creation_date|naturalday }} {% else %} {{ e.creation_date|naturaltime }} {% endif %}
-                {% endwith %}
-            </td>
-            <td>{{ e.creation_date|date:"H:i"}} </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 
-<div class="container-fluid mt-3">
-    <div class="row mb-2">
-        <div class="col">
-            <button id="register-all" class="btn btn-primary">Actualizar</button>
-        </div>
-    </div>
-</div>
 {% endblock section %}

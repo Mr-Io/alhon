@@ -9,11 +9,6 @@
 {% block section %}
 
 <div class="container-sm mt-3">
-    {% if message %}
-    <div id="message" class="row mb-2">
-        <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ message }}</p>
-    </div>
-    {% endif %}
     <form method="post">
         {% csrf_token %}
         <div class="row mb-2">
