@@ -9,7 +9,7 @@ from .models import Client
 
 @permission_required(["purchases.view_entry", "purchases.change_exit"])
 def listin(request):
-    entries = Entry.objects.filter(entrynote__registered=False) #todo: which entries should be displayed
+    entries = Entry.objects.filter(entrynote__registered=False).order_by("-pk") #todo: which entries should be displayed
     agrofood_set = set()
     for e in entries:
         agrofood_set.add(e.agrofood)

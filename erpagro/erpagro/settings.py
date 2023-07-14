@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "quality.apps.QualityConfig",
     "accounting.apps.AccountingConfig",
     "accounts.apps.AccountsConfig",
+    "archive.apps.ArchiveConfig",
     "rest_framework",
     "mathfilters",
     "frontend.apps.FrontendConfig",
@@ -132,6 +133,10 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+# FILESISTEM
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -141,8 +146,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://www.django-rest-framework.org/
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'PAGE_SIZE':  10,
 }
 
 # default User
@@ -152,3 +159,8 @@ AUTH_USER_MODEL = "accounts.User"
 # ATOMIC REQUEST
 
 ATOMIC_REQUEST = True
+
+# AUTHENTICATION URLS
+LOGIN_URL = "/registration/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = LOGIN_URL

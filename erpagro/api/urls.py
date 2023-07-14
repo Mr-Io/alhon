@@ -20,8 +20,10 @@ from .import views
 
 app_name="api"
 urlpatterns = [
+    path("", views.index, name="index"),
     path("suppliers/", views.supplier_list, name="supplier-list"),
     path("suppliers/<int:pk>/", views.supplier_detail, name="supplier-detail"),
+    path("suppliers/<int:pk>/entrynotes/", views.supplier_entrynotes, name="supplier-entrynotes"),
     path("warehouses/<int:pk>/", views.warehouse_detail, name="warehouse-detail"),
     path("agrofoodtypes/<int:pk>/", views.agrofoodtype_detail, name="agrofoodtype-detail"),
     path("carriers/<int:pk>/", views.carrier_detail, name="carrier-detail"),

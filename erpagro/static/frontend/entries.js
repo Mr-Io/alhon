@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let table = new DataTable('#entry-table', {
         paging: false,
-        orderFixed: [[5, 'asc']],
+        orderFixed: [[5, 'desc']],
         fixedHeader: true,
         rowGroup: { 
             dataSrc: row => {
@@ -61,24 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return false;
         }
     });
-
-    // EVENT
-    document.querySelector("#register-all").onclick = () => {
-
-        let formData = new FormData();
-        document.querySelectorAll(".entry-row").forEach(row => {
-            formData.append(row.dataset.pk, "register");
-        });
-        fetch("/purchases/entries/", {
-            method: "POST",
-            body: formData,
-            headers: {"X-CSRFTOKEN": csrftoken},
-        }).then(response => {
-            //alert
-            location.reload();
-        })
-        .catch(error => {console.log(error)});
-    };
 
 });
 

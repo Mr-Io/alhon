@@ -1,0 +1,115 @@
+{% extends "base/base.html" %} 
+{% load base_filters %}
+{% load static %} 
+{% load humanize %} 
+
+{% block head %}
+<script src="{% static 'frontend/purchases/selfbilling.js' %}"></script>
+{% endblock head %} 
+{% block section %} 
+{% csrf_token %}
+{% if invoice %}
+<a target="_blank" id="invoice-pdf-anchor" href="{{ invoice.pdf_file.url }}" hidden></a>
+{% endif %}
+
+<div class="container-sm">
+    <form id="daterange-form">
+        <div class="row">
+            <label for="datefrom-input" class="col-4 col-form-label">Desde:</label>
+            <label for="dateto-input" class="col-4 col-form-label">Hasta:</label>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-4">
+                <input id="datefrom-input" name="datefrom" type="date" class="form-control"
+                    onfocus="this.max=new Date().toISOString().split('T')[0]" {% if datefrom %}
+                    value="{{ datefrom|date:'Y-m-d'}}" {% endif %} required />
+            </div>
+            <div class="col-4">
+                <input id="dateto-input" name="dateto" type="date" class="form-control"
+                    onfocus="this.max=new Date().toISOString().split('T')[0]" {% if dateto %}
+                    value="{{dateto|date:'Y-m-d'}}" {% endif %} required />
+            </div>
+            <div class="col-4">
+                <input type="submit" class="form-control" value="seleccionar" />
+            </div>
+        </div>
+    </form>
+    {% if datefrom and dateto %}
+    <div class="row">
+        <p class="col">{% if suppliers %} Hay {{suppliers|length }} agricultores con albaranes por facturar {% else %}
+            Todos los albaranes han sido facturados para este rango de fechas {% endif %}</p>
+    </div>
+    {% endif %}
+    {% if suppliers %}
+    <form>
+        <div class="row">
+            <div class="col">
+                <select id="supplier-select" class="form-select">
+                    {% if not supplier_pk %}
+                    <option value="" selected>Selecciona Agricultor</option>
+                    {% else %}
+                    <option value="">Selecciona Agricultor</option>
+                    {% endif %} {% for supplier in suppliers %}
+                    {% if supplier_pk|stringformat:"s" == supplier.pk|stringformat:"s" %}
+                    <option value="{{supplier.pk}}" selected>{{supplier.name}}</option>
+                    {% else %}
+                    <option value="{{supplier.pk}}">{{supplier.name}}</option>
+                    {% endif %} {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %} {% if entrynotes %}
+<div class="container-sm mt-3">
+    <form method="post">
+        {% csrf_token %}
+        <table id="entrynotes-table" class="display" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Albarán</th>
+                    <th>Importe Neto</th>
+                    <th hidden>Fecha</th>
+                    <th hidden>Día</th>
+                    <th>Hora</th>
+                    <th>Seleccionar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entrynote in entrynotes %}
+                <tr data-pk="{{ entrynote.pk }}" class="entrynote-row">
+                    <td>
+                        <a target="_blank" {% if perms.purchases.change_entrynote %}
+                            href="{% url 'admin:purchases_entrynote_change' entrynote.pk %}" {% endif %}>
+                            {{ entrynote.pk }}
+                        </a>
+                    </td>
+                    <td>{{ entrynote.tax_amount }}</td>
+                    <td hidden>{{ entrynote.creation_date|date:"Y/m/d"}}</td>
+                    <td hidden>
+                        {{ entrynote.creation_date|normalday }} 
+                    </td>
+                    <td>{{ entrynote.creation_date|date:"H:i"}}</td>
+                    <td>
+                        <input type="checkbox" data-base-amount="{{entrynote.tax_amount}}"
+                            class="entrynote-pk-checkbox" name="entrynotes.{{entrynote.pk}}" checked>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if entrynotes %}
+        <div class="row mt-3">
+            <div class="col">
+                <h5 id="total-amount-text"></h5>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col">
+                <button type="submit" id="submit-input" class="btn btn-primary col">Facturar</button>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endif %} {% endblock section %}

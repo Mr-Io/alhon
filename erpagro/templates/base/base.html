@@ -24,25 +24,24 @@
             <li><a class="dropdown-item" href="{% url 'purchases:entries' %}">Listado</a></li>
             {% endif %}
             {% if perms.purchases.add_invoice %}
-            <li><a class="dropdown-item" href="{% url 'purchases:invoice' %}">Facturar</a></li>
+            <li><a class="dropdown-item" href="{% url 'purchases:selfbilling' %}">Facturar</a></li>
             {% endif %}
-            {% if perms.purchases.change_invoice %}
-            <li><a class="dropdown-item" href="#">Liquidación</a></li>
+            {% if perms.purchases.add_settlement %}
+            <li><a  href="{% url 'purchases:settle' %}" class="dropdown-item" href="#">Liquidación</a></li>
+            {% endif %}
+            {% if perms.purchases.change_settlement %}
             <li><a class="dropdown-item" href="#">Pago</a></li>
             {% endif %}
             {% if request.user.is_staff %}
             <li><hr class="dropdown-divider"></li>
-            {% if perms.purchases.change_entrynote %}
-            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_entrynote_changelist' %}">Albaranes histórico</a></li>
-            {% endif %}
             {% if perms.purchases.change_supplier %}
             <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_supplier_changelist' %}">Agricultores</a></li>
             {% endif %}
-            {% if perms.purchases.change_suppliergroup %}
-            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_suppliergroup_changelist' %}">Agrupaciones</a></li>
-            {% endif %}
             {% if perms.purchases.change_charge %}
             <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_charge_changelist' %}">Tarifas</a></li>
+            {% endif %}
+            {% if perms.accounting.change_regime %}
+            <li><a class="dropdown-item" target="_blank" href="{% url 'admin:accounting_regime_changelist' %}">Regímenes</a></li>
             {% endif %}
             {% if perms.purchases.change_carrieragent %}
             <li><a class="dropdown-item" target="_blank" href="{% url 'admin:purchases_carrieragent_changelist' %}">Transportistas</a></li>

@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import Land, Warehouse, QualityType, Lab, Analysis
+from base.admin import AddressAbstractAdmin
 # Register your models here.
 
 class LandInline(admin.TabularInline):
@@ -14,6 +15,7 @@ class WarehouseInline(admin.TabularInline):
 
 
 class LandAdmin(admin.ModelAdmin):
+    fieldsets = [("datos", {"fields": [("name"), ("supplier")]})] + AddressAbstractAdmin.fieldsets
     list_display = ["name", "supplier"]
     inlines = [WarehouseInline]
 

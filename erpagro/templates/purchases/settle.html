@@ -1,0 +1,115 @@
+{% extends "base/base.html" %} 
+{% load base_filters %}
+{% load static %} 
+{% load humanize %} 
+
+{% block head %}
+<script src="{% static 'frontend/purchases/settle.js' %}"></script>
+{% endblock head %} 
+{% block section %} 
+{% csrf_token %}
+{% if settlement %}
+<a target="_blank" id="settlement-pdf-anchor" href="{{ settlement.pdf_file.url }}" hidden></a>
+{% endif %}
+
+<div class="container-sm">
+    <form id="daterange-form">
+        <div class="row">
+            <label for="datefrom-input" class="col-4 col-form-label">Desde:</label>
+            <label for="dateto-input" class="col-4 col-form-label">Hasta:</label>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-4">
+                <input id="datefrom-input" name="datefrom" type="date" class="form-control"
+                    onfocus="this.max=new Date().toISOString().split('T')[0]" {% if datefrom %}
+                    value="{{ datefrom|date:'Y-m-d'}}" {% endif %} required />
+            </div>
+            <div class="col-4">
+                <input id="dateto-input" name="dateto" type="date" class="form-control"
+                    onfocus="this.max=new Date().toISOString().split('T')[0]" {% if dateto %}
+                    value="{{dateto|date:'Y-m-d'}}" {% endif %} required />
+            </div>
+            <div class="col-4">
+                <input type="submit" class="form-control" value="seleccionar" />
+            </div>
+        </div>
+    </form>
+    {% if datefrom and dateto %}
+    <div class="row">
+        <p class="col">{% if suppliers %} Hay {{suppliers|length }} agricultores con facturas por liquidar {% else %}
+            No hay facturas por liquidar en este rango de fechas {% endif %}</p>
+    </div>
+    {% endif %}
+    {% if suppliers %}
+    <form>
+        <div class="row">
+            <div class="col">
+                <select id="supplier-select" class="form-select">
+                    {% if not supplier_pk %}
+                    <option value="" selected>Selecciona Agricultor</option>
+                    {% else %}
+                    <option value="">Selecciona Agricultor</option>
+                    {% endif %} {% for supplier in suppliers %}
+                    {% if supplier_pk|stringformat:"s" == supplier.pk|stringformat:"s" %}
+                    <option value="{{supplier.pk}}" selected>{{supplier.name}}</option>
+                    {% else %}
+                    <option value="{{supplier.pk}}">{{supplier.name}}</option>
+                    {% endif %} {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %} {% if invoices %}
+<div class="container-sm mt-3">
+    <form method="post">
+        {% csrf_token %}
+        <table id="display-table" class="display" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>Factura</th>
+                    <th>Importe Total</th>
+                    <th hidden>Fecha</th>
+                    <th hidden>Día</th>
+                    <th>Hora</th>
+                    <th>Seleccionar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices%}
+                <tr data-pk="{{ invoice.pk }}" class="display-row">
+                    <td>
+                        <a target="_blank" {% if perms.purchases.change_invoice %}
+                            href="{% url 'admin:purchases_invoice_change' invoice.pk %}" {% endif %}>
+                            {{ invoice.serial_number }}
+                        </a>
+                    </td>
+                    <td>{{ invoice.total_amount }}</td>
+                    <td hidden>{{ invoice.creation_date|date:"Y/m/d"}}</td>
+                    <td hidden>
+                        {{ invoice.creation_date|normalday }} 
+                    </td>
+                    <td>{{ invoice.creation_date|date:"H:i"}}</td>
+                    <td>
+                        <input type="checkbox" data-base-amount="{{ invoice.total_amount }}"
+                            class="pk-checkbox" name="invoices.{{invoice.pk}}" checked>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if invoices %}
+        <div class="row mt-3">
+            <div class="col">
+                <h5 id="total-amount-text"></h5>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col">
+                <button type="submit" id="submit-input" class="btn btn-primary col">Liquidar</button>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endif %} {% endblock section %}

@@ -22,5 +22,6 @@ app_name = "purchases"
 urlpatterns = [
     path("entry/", views.entry, name="entry"),
     path("entries/", views.entries, name="entries"),
-    path("invoice/", views.invoice, name="invoice"),
+    path("selfbilling/", views.selfbilling, name="selfbilling"),
+    path("settle/", views.settle, name="settle"),
 ]

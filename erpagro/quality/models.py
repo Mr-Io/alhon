@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-from base.models import Agent
+from base.models import Agent, AddressAbstract
 from product.models import AgrofoodType
 
 
@@ -16,7 +16,7 @@ class QualityType(models.Model):
         return self.name
 
 
-class Land (models.Model):
+class Land (AddressAbstract, models.Model):
     name = models.CharField("nombre", max_length=256)
     supplier = models.ForeignKey("purchases.Supplier", on_delete=models.CASCADE, verbose_name="Agricultor")
 
@@ -28,12 +28,11 @@ class Land (models.Model):
         return self.name
 
 
-
 class Warehouse(models.Model):
     name = models.CharField("nombre", max_length=256)
     land = models.ForeignKey(Land, on_delete=models.CASCADE, verbose_name="finca")
     quality = models.ForeignKey(QualityType, on_delete=models.PROTECT, verbose_name="calidad")
-    agrofoodtypes = models.ManyToManyField(AgrofoodType, related_name="warehouses", verbose_name="tipo de género")
+    agrofoodtypes = models.ManyToManyField(AgrofoodType, verbose_name="tipo de género")
 
     class Meta:
         verbose_name = "nave"

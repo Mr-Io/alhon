@@ -18,9 +18,9 @@ class ClientAdmin(AgentAdmin):
 
 ########### SALE ############
 class ExitAdmin(admin.ModelAdmin):
-    fieldsets = [("Datos", {"fields":[("client"), ("entry", "weight"), ("packaging_transaction"),("price"), ("invoice"), ("in_warehouse")]})]
+    fieldsets = [("Datos", {"fields":[("client"), ("entry", "weight"), ("packaging_transaction"),("price"), ("invoice"), ("sent")]})]
     date_hierarchy = "creation_date"
-    list_display = ["pk", "creation_date", "client", "entry", "weight", "price", "invoice", "in_warehouse"] 
+    list_display = ["pk", "creation_date", "client", "entry", "weight", "price", "invoice", "sent"] 
     search_fields = ["pk", "client"]
     list_filter = ["creation_date", "entry__agrofood__subfamily__family"]
 

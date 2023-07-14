@@ -14,7 +14,7 @@ class AgrofoodFamily(models.Model):
 
 class AgrofoodSubfamily(models.Model):
     name = models.CharField(max_length=256, verbose_name="nombre")
-    family = models.ForeignKey(AgrofoodFamily, on_delete=models.CASCADE, related_name="subfamilies", verbose_name="familia")
+    family = models.ForeignKey(AgrofoodFamily, on_delete=models.CASCADE, verbose_name="familia")
 
     class Meta:
         verbose_name = "subfamilia género"
@@ -25,7 +25,7 @@ class AgrofoodSubfamily(models.Model):
 
 class AgrofoodType(models.Model):
     name = models.CharField("nombre", max_length=256)
-    subfamily = models.ForeignKey(AgrofoodSubfamily, on_delete=models.CASCADE, related_name="types", verbose_name="subfamilia")
+    subfamily = models.ForeignKey(AgrofoodSubfamily, on_delete=models.CASCADE, verbose_name="subfamilia")
     price_min = models.DecimalField("precio mín. coste", decimal_places=2, max_digits=6, blank=True, null=True)  # or float/double field?
     packaging = models.ForeignKey(Packaging, on_delete=models.PROTECT, verbose_name="envase", null=True)
     QUALITY_CHOICES = [

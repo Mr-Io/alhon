@@ -11,10 +11,14 @@ class ContactInline(admin.TabularInline):
 
 class AgentAdmin(admin.ModelAdmin):
 
-    fieldsets = [("Datos comerciales", {"fields": [("name", "cif"), ("email"), ("address"), ("phone", "mobile", "fax")]})]
+    fieldsets = [("Datos comerciales", {"fields": [("name", "cif"), ("email"), ("phone", "mobile", "fax")]}),
+                 ("Dirección Fiscal", {"fields": ["country", ("postal_code", "state"), ("city", "address_line"),]})]
     list_display = ["name", "cif"]
     search_fields = list_display
 
     inlines = [ContactInline]
+
+class AddressAbstractAdmin(admin.ModelAdmin):
+    fieldsets = [("Dirección", {"fields": ["country", ("postal_code", "state"), ("city", "address_line"),]})]
 
 

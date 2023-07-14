@@ -6,6 +6,7 @@ from purchases.models import Entry
 
 class ExpenseCommisssionAbstract(models.Model):
     commission = models.DecimalField("COMISIÓN", decimal_places=4, max_digits=6, blank=True, null=True)
+
     class Meta:
         abstract = True
 
@@ -41,7 +42,7 @@ class Exit(EntryExitAbstract):
     client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name="sales",verbose_name="cliente")
     entry = models.ForeignKey(Entry, on_delete=models.PROTECT, verbose_name="entrada")
     invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="sales", verbose_name="factura", blank=True, null=True)
-    in_warehouse = models.BooleanField("en almacén", default=True)
+    sent = models.BooleanField("Enviado", default=False)
 
     def save(self, *args, **kwargs):
         if self.entry.pending(ignore=self) < self.weight:
