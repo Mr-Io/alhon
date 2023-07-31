@@ -3,10 +3,14 @@
 {% load static %}
 
 {% block head %}
-<script src="{% static 'frontend/entry.js' %}"></script>
+<script src="{% static 'frontend/purchases/entry.js' %}"></script>
 {% endblock head %}
 
 {% block section %}
+
+{% if entrynote %}
+<a target="_blank" id="entrynote-pdf-anchor" href="{{ entrynote.pdf_file.url }}" hidden></a>
+{% endif %}
 
 <div class="container-sm mt-3">
     <form method="post">
@@ -52,13 +56,13 @@
                 <div class="row mb-2 justify-content-end">
                     <div class="col-md-4">
                         <label for="warehouse" class="form-label">Nave</label>
-                        <select id="warehouse-pk" class="form-select" required>
+                        <select id="warehouse-pk" class="form-select">
                             <option id="warehouse-hidden-option" hidden selected></option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label for="agrofoodtype" class="form-label">Género</label>
-                        <select id="agrofoodtype-pk" class="form-select" required>
+                        <select id="agrofoodtype-pk" class="form-select"></select>
                             <option id="agrofoodtype-option" hidden selected></option>
                         </select>
                     </div>

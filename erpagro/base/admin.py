@@ -13,8 +13,8 @@ class AgentAdmin(admin.ModelAdmin):
 
     fieldsets = [("Datos comerciales", {"fields": [("name", "cif"), ("email"), ("phone", "mobile", "fax")]}),
                  ("Dirección Fiscal", {"fields": ["country", ("postal_code", "state"), ("city", "address_line"),]})]
-    list_display = ["name", "cif"]
-    search_fields = list_display
+    list_display = ["pk", "name", "cif"]
+    search_fields = ["name", "cif"]
 
     inlines = [ContactInline]
 

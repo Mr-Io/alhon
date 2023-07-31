@@ -1,18 +1,12 @@
 import datetime
-from reportlab.pdfgen import canvas 
 import decimal
 from utils.func import convert_dotted_json
 
-from django.conf import settings
-from django.db.models import Q
-from django.http import JsonResponse, HttpResponse, FileResponse
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 from django.utils.dateparse import parse_date
 
 from rest_framework import status
-
-from api.views import EntryDetailSerializer
 
 from django.contrib.auth.decorators import permission_required
 
@@ -75,7 +69,8 @@ def entry(request):
             entry.save()
         entrynote.full_clean() # check relation-lvl constraints 
         entrynote.make_pdf()
-        return render(request, "purchases/entry.html", context={"suppliers": suppliers,
+        return render(request, "purchases/entry.html", context={"entrynote": entrynote,
+                                                                "suppliers": suppliers,
                                                                 "carriers": carriers,
                                                                 "boxes": boxes,
                                                                 "pallets": pallets,

@@ -1,0 +1,86 @@
+{% extends "base/base.html" %} 
+
+{% load static %} 
+
+{% block head %}
+<script src="{% static 'frontend/packaging/transaction.js' %}"></script>
+{% endblock head %} 
+
+{% block section %} 
+
+{% if transaction %}
+<a target="_blank" id="transaction-pdf-anchor" href="{{ transaction.pdf_file.url }}" hidden></a>
+{% endif %}
+
+<div class="container-sm mt-3">
+    <div class="col">
+        <h4 id="entry-title">{% block title %}{% endblock %}</h4>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row mb-2">
+            <div class="col-sm-2">
+                <label for="agent-pk" class="form-label col-form-label">Agente</label>
+            </div>
+            <div class="col-sm-10">
+                <select name="agent-pk" autocomplete="off" class="form-control" id="agent-pk" required>
+                    <option selected></option>
+                    {% for agent in agents %}
+                    <option value="{{ agent.pk }}">{{ agent.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div id="mov-label-row" class="row mb-0 justify-content-end" style="display:none;">
+            <div classs="col col-sm-2"></div>
+            <div class="col-sm-5">
+                <label for="packaging-pk" class="form-label col-form-label">Envase</label>
+            </div>
+            <div class="col-sm-5">
+                <label for="num-packages" class="form-label col-form-label">Nº Bultos retirados</label>
+            </div>
+        </div>
+        <div id="movement-input-row" class="row mb-2 justify-content-end"  style="display:none;">
+            <div class="col col-md-1 text-end">
+                <button type="button" id="close-row-btn" class="btn btn-close"></button>
+            </div>
+            <div class="col-sm-5">
+                <select name="packaging-pk" autocomplete="off" class="form-control" id="packaging-pk">
+                    <option selected></option>
+                    {% for packaging in packagings %}
+                    <option value="{{ packaging.pk }}">{{ packaging.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-sm-5">
+                <input name="num-packages" id="num-packages" type="number" class="form-control" min="0"/>
+            </div>
+        </div>
+        <div class="row mb-2 justify-content-end">
+            <div class="col-md-4 text-end">
+                <button id="add-mov-btn" type="button" class="btn btn-link btn-sm">Añadir envase</button>
+            </div>
+        </div>
+        <div class="row mb-2 text-end">
+            <div class="col">
+                <input id="submit-btn" class="btn btn-primary" type="submit" value="guardar" style="display:none;"/>
+            </div>
+        </div>
+        <div class="row justify-content-end">
+            <div class="col-md-10">
+                <div class="mt-5" id="balance-table" style="display: none">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th id="agent-name" scope="col"></th>
+                                <th scope="col">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="balance-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock section %}

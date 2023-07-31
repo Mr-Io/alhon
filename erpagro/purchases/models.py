@@ -64,10 +64,6 @@ class Supplier(Agent, CarrierAbstract):
     charge = models.ForeignKey(Charge, on_delete=models.PROTECT, verbose_name="tarifa")
     regime = models.ForeignKey(Regime, on_delete=models.PROTECT, verbose_name="régimen")
 
-    def has_view_permission(self, request):
-        
-        return hasattr(self, "user") and self.user == request.user
-
     class Meta:
         verbose_name = "agricultor"
         verbose_name_plural = "agricultores"
@@ -300,7 +296,7 @@ class Entry(EntryExitAbstract):
         if self.agrofood not in self.warehouse.agrofoodtypes.all():
             raise ValidationError({"agrofood": f"{self.agrofood} no está disponible para la nave {self.warehouse}"})
         return super().clean()
-
+    
     @admin.display(description="sin vender")
     def pending(self, ignore=None):
         exits = self.exit_set.exclude(pk=ignore.pk) if ignore else self.exit_set.all()

@@ -91,6 +91,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -160,10 +161,6 @@ REST_FRAMEWORK = {
 # default User
 
 AUTH_USER_MODEL = "accounts.User"
-
-# ATOMIC REQUEST
-
-ATOMIC_REQUEST = True
 
 # AUTHENTICATION URLS
 LOGIN_URL = "/registration/login/"

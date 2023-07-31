@@ -1,6 +1,5 @@
 import os
 
-from . import makepdf
 from accounts.models import Company
 
 def get_filename(instance):

@@ -46,15 +46,15 @@ import locale
 import textwrap
 
 from reportlab.pdfgen import canvas
-from reportlab.platypus import Table, TableStyle, Paragraph
+from reportlab.platypus import Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import ParagraphStyle
 
 from django.contrib.staticfiles import finders
 from reportlab.lib import utils
 
 import purchases 
+import packaging
 from accounts.models import Company
 
 
@@ -107,8 +107,14 @@ def draw_company_data(canvas, y=765):
 def draw_header_data(canvas, item, y=665, rowheights = None, fontsize=9):
     canvas.saveState()
     # draw invoice basic data
-    data = [[f"{item._meta.verbose_name.upper()}:", f"{item.serial_number()}", "CÓDIGO:", f"{item.supplier.pk:05}"], 
-            ["FECHA:", item.creation_date.date(), "N.I.F.:", f"{item.supplier.cif}"], 
+    if hasattr(item, "agent"):
+        agent = item.agent
+    elif hasattr(item, "supplier"):
+        agent = item.supplier
+    else:
+        agent = item.client
+    data = [[f"{item._meta.verbose_name.upper()}:", f"{item.serial_number()}", "CÓDIGO:", f"{agent.pk:05}"], 
+            ["FECHA:", f"{item.creation_date.strftime('%Y-%m-%d - %H:%M')}", "N.I.F.:", f"{agent.cif}"], 
             ]
     
     rowheights = rowheights
@@ -145,9 +151,9 @@ def draw_bottom_line(canvas, y=100, fontsize=6):
     canvas.drawRightString(550, y, company.invoice_line)
     canvas.restoreState()
 
-def draw_title(canvas, title, y=790):
+def draw_title(canvas, title, y=790, fontsize=14):
     canvas.saveState()
-    canvas.setFont("Helvetica-Bold", 14)
+    canvas.setFont("Helvetica-Bold", fontsize)
     canvas.drawCentredString(330, y , title)
     canvas.restoreState()
 
@@ -159,6 +165,8 @@ def make(item):
         return purchases_settlement(item)
     if isinstance(item, purchases.models.EntryNote):
         return purchases_entrynote(item)
+    if isinstance(item, packaging.models.TransactionGroup):
+        return packaging_transaction_group(item)
 
     raise TypeError(f"makepdf error: cannot make pdf from type {inspect.getmodule(item.__class__).__name__}.{item.__class__.__name__}")
 
@@ -381,7 +389,7 @@ def purchases_entrynote(entrynote):
                              ("VALIGN", (0, 1), (-1, -1), "BOTTOM"),
                              ])
 
-    header = ["PARTIDA", "PRODUCTO", "BULTOS", "K.NETOS", "PR.MÍNIMO"]
+    header = ["PARTIDA", "PRODUCTO", "TIPO DE ENVASE", "BULTOS", "K.NETOS"]
     tablestyle.add("FONT", (0, 0), (-1, 0), "Helvetica-Bold")
     tablestyle.add("FONT", (0, 1), (-1, -2), "Helvetica", 7)
     tablestyle.add("LINEBELOW", (0, 0), (-1, 0), 0.1, colors.black)
@@ -397,9 +405,9 @@ def purchases_entrynote(entrynote):
             rowheights.append(12)
         data.append([f"{e.pk:08}", 
                      f"{e.agrofood}",
-                     f"{e.packaging_transaction.number}",
+                     f"{e.packaging_transaction.packaging}",
+                     f"{e.packaging_transaction.number:n}",
                      f"{e.weight:n}",
-                     None,
                      ])
     for _ in range(len(entrynote.entry_set.all()), 12):
         rowheights.append(12)
@@ -408,9 +416,9 @@ def purchases_entrynote(entrynote):
     rowheights.append(18)
     data.append([None,
                  "TOTALES ...", 
+                 None,
                  f"{entrynote.packages():n}",
                  f"{entrynote.weight():n}",
-                 None,
                  ])
 
     tablestyle.add("LINEABOVE", (0, -1), (-1, -1), 0.1, colors.black)
@@ -453,8 +461,8 @@ def purchases_entrynote(entrynote):
                 (None,None,None),
                 (None,None,None),
                 ("PARTIDA", ":", f"{e.pk:08}"),
-                ("BULTOS", ":", f"{e.packaging_transaction.number}"),
-                ("KILOS", ":", f"{e.weight}"),
+                ("BULTOS", ":", f"{e.packaging_transaction.number:n}"),
+                ("KILOS", ":", f"{e.weight:n}"),
                 (None,None,None),
                 (None,None,None),
                 ("CÓDIGO", ":", f"{e.entrynote.supplier.pk:05}"),
@@ -488,3 +496,76 @@ def purchases_entrynote(entrynote):
     buffer.seek(0)
     return buffer
 
+
+def packaging_transaction_group(transaction_group):
+    buffer = io.BytesIO() # file-like buffer
+    p = canvas.Canvas(buffer, pagesize=A4) # Create the PDF object, using the buffer as its "file."
+
+    # metadata
+    p.setAuthor("mrio - mrio.dev@gmail.com")
+    p.setTitle(f"{transaction_group.__class__.__name__}-{transaction_group.pk}")
+    p.setSubject(f"Archivo de transacción de envases creada por ERPagro Software")
+
+    # draw entries table 
+    colwidths = [70, 240, 60, 150]
+    tablestyle = TableStyle([("ALIGN", (2, 0), (-1, -1), "RIGHT"),
+                             ("VALIGN", (0, 0), (-1, 1), "MIDDLE"),
+                             ("VALIGN", (0, 1), (-1, -1), "BOTTOM"),
+                             ])
+
+    # GET AGENT
+    packaging_balance = packaging.utils.packaging_balance(agent=transaction_group.agent)
+
+    data = [["CÓDIGO", "TIPO DE ENVASE", "BULTOS", "SALDO"]]
+    for pb in packaging_balance:
+        res = 0
+        for t in transaction_group.transaction_set.all():
+            if t.packaging.pk == pb["packaging"]:
+                res += t.number
+            if t.corrective:
+                res = 0
+        data += [[f'{pb["packaging"]:03}', 
+                  pb["packaging__name"], 
+                  res if res != 0 else "---",
+                  f'{pb["balance"]:+n}' if pb["balance"] != 0 else "0"]]
+              
+    rowheights = [16, 20] + [18] * (len(data)-2)
+
+    for _ in range(0, 10 - len(data)):
+        data.append([None]*4)
+        rowheights.append(18)
+    
+    tablestyle.add("FONT", (0, 0), (-1, 0), "Helvetica-Bold")
+    tablestyle.add("FONT", (0, 1), (1, -2), "Helvetica", 9)
+    tablestyle.add("FONT", (2, 1), (-1, -2), "Helvetica", 10)
+    tablestyle.add("LINEBELOW", (0, 0), (-1, 0), 0.1, colors.black)
+    tablestyle.add("LINEABOVE", (0, 0), (-1, 0), 0.1, colors.black)
+    tablestyle.add("LINEBELOW", (0, -1), (-1, -1), 0.1, colors.black)
+    # draw table
+    t = Table(data, colWidths=colwidths)#, rowHeights=rowheights)
+    table_width, table_height = t.wrap(0, 0)
+    t.setStyle(tablestyle)
+    t.wrapOn(p, table_width, table_height)
+
+
+    # DRAW
+    p.setFont("Helvetica-Bold", 8)
+    for y in [0, 421]:
+        draw_logo(p, 180, y=y+419)
+        draw_title(p, f"*SALDO ENVASES*", y=y+370, fontsize=12)
+
+        draw_company_data(p, y=y+344)
+        draw_header_data(p, transaction_group, y=y+289, rowheights=12, fontsize=8)
+        draw_agent_address(p, transaction_group.agent, y=y+289, rowheights=12, fontsize=8)
+        t.drawOn(p, 30, y+280-table_height)
+        draw_bottom_line(p, y=y+85) 
+        p.drawRightString(550, y + 70, "Fdo. El Productor.")
+
+    # line division
+    p.line(0, 421, 595, 421)
+    
+    # save and return
+    p.showPage() # Close the PDF object cleanly, and we're done.
+    p.save()
+    buffer.seek(0)
+    return buffer

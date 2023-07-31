@@ -73,10 +73,11 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Envases</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Entrada</a></li>
-            <li><a class="dropdown-item" href="#">Salida</a></li>
+            <li><a class="dropdown-item" href="{% url 'packaging:retreat' %}">Retirada</a></li>
+            <li><a class="dropdown-item" href="{% url 'packaging:deliver' %}">Entrega</a></li>
+            <li><a class="dropdown-item" href="{% url 'packaging:balance' %}">Saldo</a></li>
             {% if request.user.is_staff %}
-            <li><a class="dropdown-item" href="#">Stock</a></li>
+            <li><a class="dropdown-item" href="{% url 'packaging:stock' %}">Stock</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" target="_blank" href="{% url 'admin:packaging_packaging_changelist' %}">Envases</a></li>
             <li><a class="dropdown-item" target="_blank" href="{% url 'admin:packaging_transaction_changelist' %}">Movimientos</a></li>

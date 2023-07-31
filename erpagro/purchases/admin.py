@@ -1,10 +1,10 @@
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Tuple
+
 from django.contrib import admin
 from django.http.request import HttpRequest
 
 from .models import Supplier, Entry, EntryNote, Settlement, Invoice, CarrierAgent, Charge
 from base.admin import AgentAdmin
-from archive.admin import PdfFieldAbstractAdmin, PdfFieldAbstractInline
 from quality.admin import LandInline
 from sales.models import Exit
 
@@ -25,7 +25,7 @@ class SupplierAdmin(AgentAdmin):
     list_display = AgentAdmin.list_display + ["charge", "serial", "regime", "group", "carrier", "user"]
     list_filter = ["charge",  "regime", "regime__serial"]
     search_fields = ("name", "serial")
-    list_display_links = ["name", "charge", "regime", "group", "carrier", "user"]
+    list_display_links = ["name"]
     def serial(self, obj):
         return obj.regime.serial
     serial.admin_order_field = "supplier"
@@ -110,6 +110,7 @@ class EntryNoteAdmin(admin.ModelAdmin):
     list_display = ["pk", "supplier", "tax_amount", "invoice", "registered", "creation_date","pdf_file"]
     search_fields = ["supplier"]
     list_filter = ["registered", "creation_date"]
+    list_display_links = ["supplier"]
     readonly_fields = ["invoice", "pdf_file"]
 
     inlines = [EntryInline]
@@ -151,7 +152,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     readonly_fields = ["serial_number", "pdf_file"]
     list_display = ["serial_number", "total_amount", "settlement", "supplier", "creation_date", "pdf_file"]
     list_filter = ["creation_date"]
-    list_display_links = ("serial_number", 'settlement', 'supplier')
+    list_display_links = ["serial_number",]
 
     inlines = [EntryNoteInline]
 
@@ -172,7 +173,7 @@ class InvoiceAdmin(admin.ModelAdmin):
         return False
 
 ########### SETTLEMENT ############
-class InvoiceInline(PdfFieldAbstractInline, admin.TabularInline):
+class InvoiceInline(admin.TabularInline):
     model = Invoice
     extra = 0
     fields = InvoiceAdmin.list_display
@@ -192,7 +193,7 @@ class SettlementAdmin(admin.ModelAdmin):
     fields = ["supplier", "pdf_file"]
     date_hierarchy = "creation_date"
     readonly_fields = ["total_amount", "pdf_file"]
-    list_display = ["total_amount", "supplier","creation_date", "pdf_file"]
+    list_display = ["pk", "total_amount", "supplier","creation_date", "pdf_file"]
     list_filter = ["creation_date"]
     search_fields = ["supplier"]
 

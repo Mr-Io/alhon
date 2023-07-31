@@ -26,6 +26,9 @@ class BaseAgentAbstract(models.Model):
     mobile = models.CharField("telf. móvil", max_length=32, blank=True)
     email = models.EmailField(blank=True, null=True)
 
+    def is_user_from(self, request):
+        return hasattr(self, "user") and self.user == request.user
+
     class Meta:
         abstract = True
 
@@ -50,8 +53,7 @@ class EntryExitAbstract(models.Model):
     weight = models.DecimalField("peso neto", decimal_places=0, max_digits=8, validators=[MinValueValidator(1)])
     price = models.DecimalField("precio", decimal_places=2, max_digits=6, blank=True, null=True, validators=[MinValueValidator(0.01)])
     creation_date = models.DateTimeField("fecha", auto_now_add=True)
-    packaging_transaction = models.OneToOneField("packaging.Transaction", on_delete=models.PROTECT, blank=True, null=True, verbose_name="Envases")
-
+    packaging_transaction = models.OneToOneField("packaging.Transaction", on_delete=models.PROTECT, verbose_name="Envases")
 
     #price - precio total
     @admin.display(description="importe")

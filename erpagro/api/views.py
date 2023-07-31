@@ -12,14 +12,15 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
+from base.models import Agent
+from packaging.utils import packaging_balance
 from product.models import AgrofoodType
 from purchases.models import Supplier, CarrierAgent, Entry, EntryNote
 from quality.models import Warehouse
 from sales.models import Exit
 
-from .serializers import SupplierListSerializer, SupplierDetailSerializer, WarehouseDetailSerializer, AgrofoodTypeDetailSerializer, CarrierAgentDetailSerializer, EntryDetailSerializer, ExitDetailSerializer, EntryNoteListSerializer
 
-from . import views
+from .serializers import SupplierListSerializer, SupplierDetailSerializer, WarehouseDetailSerializer, AgrofoodTypeDetailSerializer, CarrierAgentDetailSerializer, EntryDetailSerializer, ExitDetailSerializer, EntryNoteListSerializer, PackagingBalanceSerializer
 
 paginator = PageNumberPagination()
 paginator.page_size = settings.REST_FRAMEWORK.get("PAGE_SIZE", 10)
@@ -33,6 +34,7 @@ def index(request):
             "authorization": resolve(reverse("api:authentication-token")).route,
             "supplier-detail": resolve(reverse("api:supplier-detail", args=[0])).route,
             "supplier-entrynotes": resolve(reverse("api:supplier-entrynotes", args=[0])).route,
+            "agent-packaging-balance": resolve(reverse("api:agent-packaging-balance", args=[0])).route,
         })
 
 ######################## TOKEN AUTHENTICATION ########################
@@ -48,8 +50,8 @@ def authentication_token(request):
         user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
         response_data = {"token": token.key}
-        if user.supplier:
-            response_data["supplier_id"] = user.supplier.pk
+        if user.agent:
+            response_data["supplier_id"] = user.agent.pk
         return Response(response_data)
 
 ######################## SUPPLIERS ########################
@@ -69,7 +71,7 @@ def supplier_detail(request, pk):
     supplier = get_object_or_404(Supplier, pk=pk)
     
     if request.method == "GET":
-        if not (supplier.has_view_permission(request) or request.user.has_perms(["purchases.view_supplier", 
+        if not (supplier.is_user_from(request) or request.user.has_perms(["purchases.view_supplier", 
                                                                                  "quality.view_land", 
                                                                                  "quality.view_warehouse"])):
             return Response({"detail": "Usted no tiene permiso para realizar esta acción"}, status=status.HTTP_403_FORBIDDEN)
@@ -83,13 +85,28 @@ def supplier_entrynotes(request, pk):
     supplier = get_object_or_404(Supplier, pk=pk)
     
     if request.method == "GET":
-        if not (supplier.has_view_permission(request) or request.user.has_perms(["purchases.view_supplier", 
-                                                                                  "quality.view_entrynotes",])):
+        if not (supplier.is_user_from(request) or request.user.has_perms(["purchases.view_supplier", 
+                                                                          "quality.view_entrynotes",])):
             return Response({"detail": "Usted no tiene permiso para realizar esta acción"}, status=status.HTTP_403_FORBIDDEN)
         entrynotes = EntryNote.objects.filter(supplier=supplier).order_by("-creation_date")
         entrynotes_paginated = paginator.paginate_queryset(entrynotes, request)
         serializer = EntryNoteListSerializer(entrynotes_paginated, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+######################## AGENT ########################
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def agent_packaging_balance(request, pk):
+    agent = get_object_or_404(Agent, pk=pk)
+    balance = packaging_balance(agent=agent) 
+
+    if request.method == "GET":
+        if not (agent.is_user_from(request) or request.user.has_perms(["packaging.view_transaction"])):
+            return Response({"detail": "Usted no tiene permiso para realizar esta acción"}, status=status.HTTP_403_FORBIDDEN)
+        serializer = PackagingBalanceSerializer(data=balance, many=True)
+        serializer.is_valid()
+        return Response(serializer.data)
 
 
 ######################## WAREHOUSE ########################

@@ -6,7 +6,7 @@ from base.models import Agent
 # Create your models here.
 
 class User(AbstractUser):
-    supplier = models.OneToOneField("purchases.Supplier", on_delete=models.PROTECT, verbose_name="agricultor", blank=True, null=True)
+    agent = models.OneToOneField(Agent, on_delete=models.PROTECT, verbose_name="agente", blank=True, null=True)
 
     class Meta:
         verbose_name = "usuario"

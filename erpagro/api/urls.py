@@ -31,4 +31,5 @@ urlpatterns = [
     path("entries/<int:pk>/", views.entry_detail, name="entry-detail"),
     path("exits/", views.exit_list, name="exit-list"),
     path("exits/<int:pk>/", views.exit_detail, name="exit-detail"),
+    path("agent/<int:pk>/packaging-balance/", views.agent_packaging_balance, name="agent-packaging-balance")
 ]

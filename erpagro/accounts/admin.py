@@ -9,9 +9,9 @@ from .models import User, Company
 # Register your models here.
 
 class UserAdminCustom(UserAdmin):
-    fieldsets = UserAdmin.fieldsets + (('Agricultor', {"fields": [("supplier")]}),)
-    list_display = ('username', "supplier", 'is_active')
-    list_filter = ('is_staff', 'is_superuser')
+    fieldsets = UserAdmin.fieldsets + (('Agente', {"fields": [("agent")]}),)
+    list_display = ('username', "agent", "is_staff", "is_superuser", 'is_active')
+    list_filter = ('is_staff', 'is_superuser', 'is_active')
     search_fields = ('username',)
 
 

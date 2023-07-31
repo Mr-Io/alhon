@@ -11,10 +11,12 @@ gastos_fieldsets = [("Gastos",{"fields": [("commission", "commission_agent"), ("
 ########### CARRIER AGENT ############
 class CommissionAgentAdmin(AgentAdmin):
     fieldsets = AgentAdmin.fieldsets + [("Costes", {"fields": [("commission")]})]
+    list_display_links = ["name"]
 
 ########### CLIENT ############
 class ClientAdmin(AgentAdmin):
     fieldsets = AgentAdmin.fieldsets + gastos_fieldsets
+    list_display_links = ["name"]
 
 ########### SALE ############
 class ExitAdmin(admin.ModelAdmin):

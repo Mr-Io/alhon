@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let entrycount = 0;
     let submitbtn = document.querySelector("#submitbtn");
 
+    let entrynote_pdf_anchor  = document.querySelector("#entrynote-pdf-anchor");
+
     // ########## FUNCTIONS ##########
     function addentry() {
         // add entry
@@ -43,10 +45,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // attribute changes
         //next_entrynode.querySelector("h4").innerHTML = `Entrada ${entryid}`;
         warehouse_pk.name = `entries.${entryid}.warehouse-pk`;
+        warehouse_pk.setAttribute("required", "");
         agrofood_pk.name = `entries.${entryid}.agrofoodtype-pk`;
+        agrofood_pk.setAttribute("required", "");
         gross_weight.name = `entries.${entryid}.grossweight`;
         gross_weight.setAttribute("required", "");
         packaging_pk.name = `entries.${entryid}.packaging-pk`;
+        packaging_pk.setAttribute("required", "");
         num_packages.name = `entries.${entryid}.numpackages`;
         num_packages.setAttribute("required", "");
         //functions
@@ -124,6 +129,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ########## EVENT LISTENERS ##########
     document.querySelector("#add-entry").onclick = addentry;
+
+    // events
+    if (entrynote_pdf_anchor){
+        window.open(entrynote_pdf_anchor.getAttribute("href"));
+    }
 
     supplier_pk.oninput = () => {
         if (message) {message.remove()}

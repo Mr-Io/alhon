@@ -1,0 +1,32 @@
+{% extends "base/base.html" %} {% load static %} {% load base_filters %} {% load humanize %} {% load mathfilters %} {% block head %}
+<script src="{% static 'frontend/packaging/stock.js' %}"></script>
+{% endblock head %} {% block section %} {% csrf_token %}
+<div class="container-fluid mt-3">
+    {% if message %}
+    <div id="message" class="row mb-2">
+        <p class="text-center text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3">{{ message }}</p>
+    </div>
+    {% endif %}
+    <table id="packaging-table" class="display" style="width: 100%">
+        <thead>
+            <tr>
+                <th>Envase</th>
+                <th>Almacén</th>
+                <th>Saldo</th>
+                <th>Activos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in balances %}
+            <tr data-pk="{{ p.pk }}" class="packaging-row">
+                <td><a target="_blank" {% if perms.packaging.change_packaging %} href="{% url 'admin:packaging_packaging_change' b.packaging %}" {% endif %}> {{ b.packaging__name}} </a></td>
+                <td>{{b.packaging__total | add:b.balance}}</td>
+                <td>{{ b.balance | mul:-1 }}</td>
+                <td>{{ b.packaging__total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock section %}

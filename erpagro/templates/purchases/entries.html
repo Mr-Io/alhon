@@ -2,7 +2,7 @@
 {% load static %} 
 {% load base_filters %}
 {% load humanize %} {% block head %}
-<script src="{% static 'frontend/entries.js' %}"></script>
+<script src="{% static 'frontend/purchases/entries.js' %}"></script>
 {% endblock head %} {% block section %} {% csrf_token %}
 <div class="container-fluid mt-3">
     {% if message %}
@@ -28,11 +28,7 @@
             <tr data-pk="{{ e.pk }}" class="entry-row">
                 <td><a target="_blank" {% if perms.purchases.change_entrynote %} href="{% url 'admin:purchases_entrynote_change' e.entrynote.pk %}" {% endif %}> {{ e.entrynote.pk }} </a></td>
                 <td id="price-box">
-                    {% if e.price %}
-                    <div id="price-noform">{{ e.price|floatformat:2 }}</div>
-                    {% else %}
-                    <div id="price-noform">-</div>
-                    {% endif %}
+                    <div id="price-noform">{% if e.price %}{{ e.price|floatformat:2 }}{% else %}-{% endif %}</div>
                     <form id="price-form" class="form-inline" style="display: none">
                         <input hidden name="entry-pk" value="{{ e.pk }}" />
                         <input name="price" id="price-value" type="number" class="form-control col-8" step="0.01" min="0" autocomplete="off" value="{% if e.price %}{{ e.price|floatformat:2 }}{% endif %}" selected />

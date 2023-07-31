@@ -1,0 +1,59 @@
+{% extends "base/base.html" %} {% load static %} {% block head %}
+<script src="{% static 'frontend/packaging/balance.js' %}"></script>
+{% endblock head %} {% block section %}
+
+{% if new_page_anchor %}
+<a target="_blank" id="new-page-anchor" href="{{ new_page_anchor }}" hidden></a>
+{% endif %}
+
+<div class="container-sm mt-3">
+    <div class="col">
+        <h4 id="entry-title">Saldo</h4>
+    </div>
+    <form method="post" onkeydown="return event.key != 'Enter';">
+        {% csrf_token %}
+        <div class="row mb-2">
+            <div class="col-sm-2">
+                <label for="agent-pk" class="form-label col-form-label">Agente</label>
+            </div>
+            <div class="col-sm-10">
+                <select name="agent-pk" autocomplete="off" class="form-control" id="agent-pk" required>
+                    <option selected></option>
+                    {% for agent in agents %}
+                    <option value="{{ agent.pk }}">{{ agent.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div id="mov-label-row" class="row mb-0 justify-content-end" style="display: none">
+            <div classs="col col-sm-2"></div>
+            <div class="col-sm-5">
+                <label for="packaging-pk" class="form-label col-form-label">Envase</label>
+            </div>
+            <div class="col-sm-5">
+                <label for="num-packages" class="form-label col-form-label">Nº Bultos retirados</label>
+            </div>
+        </div>
+        <div class="row justify-content-end">
+            <div class="col-md-10">
+                <div class="mt-5" id="balance-table" style="display: none">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th id="agent-name" scope="col"></th>
+                                <th scope="col">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="balance-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-end">
+            <div class="col-md-10 text-end">
+                <input id="submit-btn" class="btn btn-primary" type="submit" value="Actualizar Saldo" hidden />
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock section %}

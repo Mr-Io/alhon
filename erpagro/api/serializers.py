@@ -6,6 +6,13 @@ from purchases.models import Supplier, CarrierAgent, Charge, Entry, EntryNote, I
 from quality.models import Land, Warehouse
 from sales.models import Exit
 
+#################### PACKAGING BALANCE ####################
+class PackagingBalanceSerializer(serializers.Serializer):
+    pk = serializers.IntegerField(source="packaging")
+    name = serializers.CharField(max_length=Packaging._meta.get_field("name").max_length, source="packaging__name")
+    balance = serializers.IntegerField()
+
+
 #################### PACKAGING ####################
 class PackagingTypeListSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.files import File
 
-from .pdfutils import get_filename, get_filepath, makepdf
+from .pdfutils import makepdf, get_filename, get_filepath 
 
 
 
@@ -14,7 +14,7 @@ class MakeFileAbstract(models.Model):
             self.make_pdf(save=False)               # OR USE SIGNALS...
         return super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs):              # IT IS BETTER TO USE SIGNALS SINCE BULK DELETIONS WONT TRIGGER THIS
         self.delete_pdf(save=False)
         return super().delete(*args, **kwargs)
 
