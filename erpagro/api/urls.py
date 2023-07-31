@@ -21,6 +21,7 @@ from .import views
 app_name="api"
 urlpatterns = [
     path("", views.index, name="index"),
+    path("auth-token/", views.authentication_token, name="authentication-token"),
     path("suppliers/", views.supplier_list, name="supplier-list"),
     path("suppliers/<int:pk>/", views.supplier_detail, name="supplier-detail"),
     path("suppliers/<int:pk>/entrynotes/", views.supplier_entrynotes, name="supplier-entrynotes"),
